@@ -5,10 +5,10 @@ import PropTypes from 'prop-types';
  */
 export default function LoadingSpinner({ text = 'Memuat...' }) {
   return (
-    <div className="loading-state" role="status" aria-live="polite">
-      <div className="spinner" aria-hidden="true" />
+    <output className="loading-state" aria-live="polite">
+      <span className="spinner" aria-hidden="true" />
       <span className="muted">{text}</span>
-    </div>
+    </output>
   );
 }
 

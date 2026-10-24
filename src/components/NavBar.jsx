@@ -16,6 +16,10 @@ export default function NavBar({
   onMarkRead,
   onMarkAllRead,
 }) {
+  const notifLabel = unreadCount > 0
+    ? `Notifikasi, ${unreadCount} belum dibaca`
+    : 'Notifikasi';
+
   return (
     <header className="nav">
       <Link to="/" className="brand">Del<b>Food</b></Link>
@@ -40,7 +44,7 @@ export default function NavBar({
               className={`btn-notif ${unreadCount > 0 ? 'has-unread' : ''}`}
               onClick={() => setShowNotif((v) => !v)}
               title="Notifikasi"
-              aria-label={`Notifikasi${unreadCount > 0 ? `, ${unreadCount} belum dibaca` : ''}`}
+              aria-label={notifLabel}
               aria-expanded={showNotif}
             >
               🔔 {unreadCount > 0 && (

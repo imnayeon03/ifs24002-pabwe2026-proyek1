@@ -33,25 +33,29 @@ export default function Riwayat() {
     setConfirmOrder(null);
   };
 
+  const renderOrdersContent = () => {
+    if (loading) {
+      return <LoadingSpinner text="Memuat daftar pesanan..." />;
+    }
+    if (orders.length === 0) {
+      return <p className="muted">Belum ada pesanan.</p>;
+    }
+    return orders.map((o) => (
+      <PesananCard
+        key={o.id}
+        order={o}
+        onBayar={() => setSelectedPayOrder(o)}
+        onKonfirmasiTerima={() => handleKonfirmasiTerimaClick(o)}
+      />
+    ));
+  };
+
   return (
     <>
       <h1>Pesanan Saya</h1>
       {error && <div className="error">{error}</div>}
 
-      {loading ? (
-        <LoadingSpinner text="Memuat daftar pesanan..." />
-      ) : !orders.length ? (
-        <p className="muted">Belum ada pesanan.</p>
-      ) : (
-        orders.map((o) => (
-          <PesananCard
-            key={o.id}
-            order={o}
-            onBayar={() => setSelectedPayOrder(o)}
-            onKonfirmasiTerima={() => handleKonfirmasiTerimaClick(o)}
-          />
-        ))
-      )}
+      {renderOrdersContent()}
 
       {selectedPayOrder && (
         <ModalBayar

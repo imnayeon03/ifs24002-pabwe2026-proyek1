@@ -4,6 +4,12 @@ import PropTypes from 'prop-types';
  * Komponen Presentasional: Formulir Tambah dan Ubah Menu Kios
  */
 export default function MenuForm({ editId, form, errors, onSet, onSubmit, onBatal, loading = false }) {
+  const getSubmitLabel = () => {
+    if (loading) return 'Menyimpan...';
+    if (editId) return 'Simpan Perubahan';
+    return 'Tambah Menu';
+  };
+
   return (
     <form className="card filters" onSubmit={onSubmit} noValidate>
       <div>
@@ -53,7 +59,7 @@ export default function MenuForm({ editId, form, errors, onSet, onSubmit, onBata
         {errors.stok && <p className="error small">{errors.stok}</p>}
       </div>
       <button className="primary" type="submit" disabled={loading}>
-        {loading ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Tambah Menu'}
+        {getSubmitLabel()}
       </button>
       {editId && (
         <button type="button" onClick={onBatal} disabled={loading}>Batal</button>

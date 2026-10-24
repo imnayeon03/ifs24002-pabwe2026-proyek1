@@ -23,8 +23,9 @@ export function useMenu(kiosId) {
   };
 
   const deleteMenu = async (id, nama) => {
+    const namaLabel = nama ? `"${nama}" ` : '';
     const ok = await run(() => api.delete(`/menu/${id}`), {
-      success: `Menu ${nama ? `"${nama}" ` : ''}telah dihapus`,
+      success: `Menu ${namaLabel}telah dihapus`,
     });
     if (ok) reload();
     return ok;

@@ -19,8 +19,9 @@ export function usePolling(fn, intervalMs = 5000, enabled = true) {
       if (!isMounted) return;
       try {
         await fnRef.current();
-      } catch (e) {
-        // Mengabaikan error callback jika komponen sudah dilepas
+      } catch (err) {
+        // Log debug error callback polling agar tidak ditelan secara diam-diam
+        console.debug('[usePolling] Callback error handled:', err);
       }
     };
 

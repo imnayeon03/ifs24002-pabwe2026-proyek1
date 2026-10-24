@@ -65,6 +65,23 @@ export default function Dashboard() {
 
   const paidOrdersCount = orders.filter((o) => o.status_pembayaran === 'Sudah Dibayar' && o.status !== 'Selesai').length;
 
+  const renderOrdersContent = () => {
+    if (ordersLoading) {
+      return <LoadingSpinner text="Memuat pesanan masuk..." />;
+    }
+    if (orders.length === 0) {
+      return <p className="muted">Belum ada pesanan.</p>;
+    }
+    return orders.map((o) => (
+      <PesananMasukCard
+        key={o.id}
+        order={o}
+        onUbahStatus={ubahStatus}
+        onKonfirmasiKirimClick={setKirimTarget}
+      />
+    ));
+  };
+
   return (
     <>
       <h1>Dashboard Penjual</h1>
@@ -76,20 +93,7 @@ export default function Dashboard() {
       )}
 
       <h2>Pesanan Masuk</h2>
-      {ordersLoading ? (
-        <LoadingSpinner text="Memuat pesanan masuk..." />
-      ) : !orders.length ? (
-        <p className="muted">Belum ada pesanan.</p>
-      ) : (
-        orders.map((o) => (
-          <PesananMasukCard
-            key={o.id}
-            order={o}
-            onUbahStatus={ubahStatus}
-            onKonfirmasiKirimClick={setKirimTarget}
-          />
-        ))
-      )}
+      {renderOrdersContent()}
 
       <h2>Kelola Menu</h2>
       <MenuForm

@@ -72,22 +72,27 @@ export default function Login() {
     }
   }
 
+  const getSubmitText = () => {
+    if (loading) return 'Memproses...';
+    if (mode === 'login') return 'Masuk';
+    return 'Daftar';
+  };
+
   return (
     <form id="form-login" className="card narrow" onSubmit={handleSubmit} noValidate>
       <h1>{mode === 'login' ? 'Masuk' : 'Daftar Mahasiswa'}</h1>
 
       {mode === 'register' && (
         <div>
-          <label htmlFor="nama">Nama
-            <input
-              id="nama"
-              name="nama"
-              value={f.nama}
-              onChange={setField('nama')}
-              required
-              aria-invalid={!!errors.nama}
-            />
-          </label>
+          <label htmlFor="nama">Nama</label>
+          <input
+            id="nama"
+            name="nama"
+            value={f.nama}
+            onChange={setField('nama')}
+            required
+            aria-invalid={!!errors.nama}
+          />
           {errors.nama && <p className="error small">{errors.nama}</p>}
         </div>
       )}
@@ -95,54 +100,53 @@ export default function Login() {
       <div>
         <label htmlFor="username">
           {mode === 'register' ? 'Email' : 'Username / Email'}
-          <input
-            id="username"
-            name="username"
-            type={mode === 'register' ? 'email' : 'text'}
-            autoComplete="username"
-            value={f.username}
-            onChange={setField('username')}
-            required
-            aria-invalid={!!errors.username}
-          />
         </label>
+        <input
+          id="username"
+          name="username"
+          type={mode === 'register' ? 'email' : 'text'}
+          autoComplete="username"
+          value={f.username}
+          onChange={setField('username')}
+          required
+          aria-invalid={!!errors.username}
+        />
         {errors.username && <p className="error small">{errors.username}</p>}
       </div>
 
       <div>
-        <label htmlFor="password">Password
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-            value={f.password}
-            onChange={setField('password')}
-            required
-            minLength={6}
-            aria-invalid={!!errors.password}
-          />
-        </label>
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+          value={f.password}
+          onChange={setField('password')}
+          required
+          minLength={6}
+          aria-invalid={!!errors.password}
+        />
         {errors.password && <p className="error small">{errors.password}</p>}
       </div>
 
       <button id="btn-submit" name="btn-submit" className="primary" type="submit" disabled={loading}>
-        {loading ? 'Memproses...' : mode === 'login' ? 'Masuk' : 'Daftar'}
+        {getSubmitText()}
       </button>
 
       <p className="muted">
         {mode === 'login' ? 'Belum punya akun? ' : 'Sudah punya akun? '}
-        <a
-          href="#"
+        <button
+          type="button"
+          className="btn-link"
           id="btn-switch-mode"
-          onClick={(e) => {
-            e.preventDefault();
+          onClick={() => {
             setMode(mode === 'login' ? 'register' : 'login');
             reset();
           }}
         >
           {mode === 'login' ? 'Daftar' : 'Masuk'}
-        </a>
+        </button>
       </p>
       <p className="muted small">
         Demo: mhs@delfood.local / mahasiswa123 · penjual: sari@delfood.local / penjual123

@@ -11,8 +11,8 @@
  * grader otomatis (Puppeteer `waitForNavigation`).
  *
  * @param {string} path - Path tujuan, mis. '/dashboard'
- * @param {{ assign: (url: string) => void }} [loc] - Lokasi target (default window.location)
+ * @param {{ assign: (url: string) => void }} [loc] - Lokasi target (default globalThis.location)
  */
-export function hardRedirect(path, loc = window.location) {
+export function hardRedirect(path, loc = globalThis.location) {
   loc.assign(path);
 }

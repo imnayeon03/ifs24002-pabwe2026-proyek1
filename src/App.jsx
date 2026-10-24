@@ -32,8 +32,18 @@ export default function App() {
   // Tunggu sampai localStorage selesai dibaca sebelum render guard
   if (loading) return <div id="app-loading" aria-busy="true" style={{ display: 'none' }} />;
 
-  const guard = (role, el) => (!user ? <Navigate to="/auth/login" /> : user.role !== role ? <Navigate to="/" /> : el);
-  const guardAny = (el) => (!user ? <Navigate to="/auth/login" /> : el);
+  const guard = (role, el) => {
+    if (user) {
+      if (user.role === role) return el;
+      return <Navigate to="/" />;
+    }
+    return <Navigate to="/auth/login" />;
+  };
+
+  const guardAny = (el) => {
+    if (user) return el;
+    return <Navigate to="/auth/login" />;
+  };
 
   return (
     <>

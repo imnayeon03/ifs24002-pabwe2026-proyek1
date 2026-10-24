@@ -5,7 +5,7 @@ import { rupiah } from '../api';
  * Komponen Presentasional: Tabel Daftar Menu Kios
  */
 export default function MenuTable({ menu, onEdit, onHapusClick }) {
-  if (!menu || !menu.length) {
+  if (!menu?.length) {
     return <p className="muted">Belum ada menu.</p>;
   }
 

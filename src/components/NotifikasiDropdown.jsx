@@ -7,7 +7,7 @@ export default function NotifikasiDropdown({ isOpen, onClose, notifications, onM
   const unreadCount = notifications.filter((n) => !n.dibaca).length;
 
   return (
-    <div className="notif-dropdown" role="region" aria-label="Daftar Notifikasi">
+    <section className="notif-dropdown" aria-label="Daftar Notifikasi">
       <div className="notif-header">
         <div>
           <b>Notifikasi</b>
@@ -22,27 +22,28 @@ export default function NotifikasiDropdown({ isOpen, onClose, notifications, onM
       </div>
 
       <div className="notif-list">
-        {!notifications.length ? (
+        {notifications.length === 0 ? (
           <p className="notif-empty muted">Belum ada notifikasi saat ini.</p>
         ) : (
           notifications.map((n) => (
-            <div
+            <button
+              type="button"
               key={n.id}
               className={`notif-item ${n.dibaca ? 'read' : 'unread'}`}
               onClick={() => !n.dibaca && onMarkRead(n.id)}
             >
-              <div className="notif-icon">{getNotifIcon(n.tipe)}</div>
-              <div className="notif-content">
-                <div className="notif-title">{n.judul}</div>
-                <div className="notif-message">{n.pesan}</div>
+              <span className="notif-icon">{getNotifIcon(n.tipe)}</span>
+              <span className="notif-content">
+                <span className="notif-title">{n.judul}</span>
+                <span className="notif-message">{n.pesan}</span>
                 <small className="notif-time muted">{n.created_at}</small>
-              </div>
+              </span>
               {!n.dibaca && <span className="unread-dot" title="Belum dibaca" />}
-            </div>
+            </button>
           ))
         )}
       </div>
-    </div>
+    </section>
   );
 }
 

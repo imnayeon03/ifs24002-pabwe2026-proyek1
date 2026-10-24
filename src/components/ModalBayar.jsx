@@ -17,8 +17,17 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <dialog
+      open
+      className="modal-overlay"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="modal-content">
         <div className="modal-header">
           <h3>Pembayaran Pesanan {orderNo ? `#${orderNo}` : ''}</h3>
           <button type="button" className="btn-close" onClick={onClose}>✕</button>
@@ -31,7 +40,8 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
               <div className="price-large">{rupiah(total)}</div>
             </div>
 
-            <label htmlFor="modal-select-metode">Pilih Metode Pembayaran:
+            <div>
+              <label htmlFor="modal-select-metode">Pilih Metode Pembayaran:</label>
               <select
                 id="modal-select-metode"
                 aria-label="Pilih Metode Pembayaran"
@@ -44,7 +54,7 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
                 <option value="GoPay / OVO / Dana">E-Wallet (GoPay / OVO / Dana)</option>
                 <option value="Tunai">Tunai di Tempat</option>
               </select>
-            </label>
+            </div>
 
             {metode === 'QRIS' && (
               <div className="qris-card">
@@ -126,7 +136,7 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
           </div>
         </form>
       </div>
-    </div>
+    </dialog>
   );
 }
 

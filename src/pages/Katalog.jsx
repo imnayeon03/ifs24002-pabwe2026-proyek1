@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import api, { rupiah } from '../api';
 import { useAuth } from '../auth.jsx';
 
@@ -8,12 +9,20 @@ export default function Katalog({ onAdd }) {
   const [kategori, setKategori] = useState('');
   const [err, setErr] = useState('');
   const { user } = useAuth();
+
   useEffect(() => {
     const t = setTimeout(() => {
       api.get('/menu', { params: { q, kategori } }).then((r) => setMenu(r.data)).catch(() => setErr('Gagal memuat menu'));
     }, 250);
     return () => clearTimeout(t);
   }, [q, kategori]);
+
+  const getButtonLabel = (m) => {
+    if (!user) return 'Login untuk memesan';
+    if (!m.tersedia || m.stok < 1) return 'Habis';
+    return '+ Keranjang';
+  };
+
   return (
     <>
       <section className="hero">
@@ -51,12 +60,16 @@ export default function Katalog({ onAdd }) {
             <p className="price">{rupiah(m.harga)}</p>
             <p className="muted small">Stok: {m.stok}</p>
             <button className="primary" disabled={!m.tersedia || m.stok < 1 || !user} onClick={() => onAdd(m)}>
-              {!user ? 'Login untuk memesan' : m.stok < 1 || !m.tersedia ? 'Habis' : '+ Keranjang'}
+              {getButtonLabel(m)}
             </button>
           </div>
         ))}
-        {!menu.length && !err && <p className="muted">Menu tidak ditemukan.</p>}
+        {menu.length === 0 && !err && <p className="muted">Menu tidak ditemukan.</p>}
       </div>
     </>
   );
 }
+
+Katalog.propTypes = {
+  onAdd: PropTypes.func.isRequired,
+};

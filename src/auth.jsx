@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import PropTypes from 'prop-types';
 
 const Ctx = createContext(null);
 export const useAuth = () => useContext(Ctx);
@@ -14,7 +15,7 @@ export function AuthProvider({ children }) {
       return null;
     }
   });
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   useEffect(() => {
     try {
@@ -27,7 +28,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = (token, u) => {
+  const login = useCallback((token, u) => {
     try {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(u));
@@ -35,20 +36,29 @@ export function AuthProvider({ children }) {
       console.error('Gagal menyimpan token ke localStorage:', err);
     }
     setUser(u);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     try {
       localStorage.clear();
     } catch (err) {
       console.error('Gagal membersihkan localStorage:', err);
     }
     setUser(null);
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, loading, login, logout }),
+    [user, loading, login, logout]
+  );
 
   return (
-    <Ctx.Provider value={{ user, loading, login, logout }}>
+    <Ctx.Provider value={value}>
       {children}
     </Ctx.Provider>
   );
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};

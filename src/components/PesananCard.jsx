@@ -41,7 +41,7 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
       {!isPaid && (
         <div className="action-box payment-action">
           <span>Pesanan ini belum dibayar. Silakan lakukan pembayaran agar penjual segera memproses pesanan Anda.</span>
-          <button type="button" className="primary" onClick={() => onBayar && onBayar(o)}>
+          <button type="button" className="primary" onClick={() => onBayar?.(o)}>
             💳 Bayar Sekarang
           </button>
         </div>
@@ -56,7 +56,7 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
               Silakan periksa makanan/minuman yang Anda terima. Jika sudah sesuai, klik tombol konfirmasi.
             </p>
           </div>
-          <button type="button" className="btn-terima" onClick={() => onKonfirmasiTerima && onKonfirmasiTerima(o)}>
+          <button type="button" className="btn-terima" onClick={() => onKonfirmasiTerima?.(o)}>
             ✅ Konfirmasi Sudah Menerima Pesanan
           </button>
         </div>

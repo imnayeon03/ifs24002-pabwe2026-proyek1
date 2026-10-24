@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { rupiah } from '../api';
 import { useForm, validators } from '../hooks/useForm.js';
 import { useCheckout } from '../hooks/useCheckout.js';
@@ -54,12 +55,12 @@ export default function Keranjang({ cart, setCart }) {
     });
   };
 
-  if (!cart.length) return (
-  <section>
-    <h1>Keranjang</h1>
-    <p className="muted">Keranjang kosong.</p>
-  </section>
-);
+  if (cart.length === 0) return (
+    <section>
+      <h1>Keranjang</h1>
+      <p className="muted">Keranjang kosong.</p>
+    </section>
+  );
 
   return (
     <div className="card narrow">
@@ -86,21 +87,21 @@ export default function Keranjang({ cart, setCart }) {
       ))}
 
       <div>
-        <label htmlFor="jam_ambil">Jam Pengambilan
-          <input
-            id="jam_ambil"
-            name="jam_ambil"
-            type="time"
-            value={form.jam}
-            onChange={setField('jam')}
-            required
-            aria-invalid={!!errors.jam}
-          />
-        </label>
+        <label htmlFor="jam_ambil">Jam Pengambilan</label>
+        <input
+          id="jam_ambil"
+          name="jam_ambil"
+          type="time"
+          value={form.jam}
+          onChange={setField('jam')}
+          required
+          aria-invalid={!!errors.jam}
+        />
         {errors.jam && <p className="error small">{errors.jam}</p>}
       </div>
 
-      <label htmlFor="metode_pembayaran">Metode Pembayaran
+      <div>
+        <label htmlFor="metode_pembayaran">Metode Pembayaran</label>
         <select
           id="metode_pembayaran"
           name="metode_pembayaran"
@@ -114,7 +115,7 @@ export default function Keranjang({ cart, setCart }) {
           <option value="GoPay / OVO / Dana">E-Wallet (GoPay / OVO / Dana)</option>
           <option value="Tunai">Tunai di Tempat</option>
         </select>
-      </label>
+      </div>
 
       <p className="price">Total: {rupiah(total)}</p>
       <p className="muted small">
@@ -151,3 +152,19 @@ export default function Keranjang({ cart, setCart }) {
     </div>
   );
 }
+
+Keranjang.propTypes = {
+  cart: PropTypes.arrayOf(
+    PropTypes.shape({
+      menu: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        nama: PropTypes.string.isRequired,
+        harga: PropTypes.number.isRequired,
+        stok: PropTypes.number.isRequired,
+        kios_nama: PropTypes.string,
+      }).isRequired,
+      jumlah: PropTypes.number.isRequired,
+    })
+  ).isRequired,
+  setCart: PropTypes.func.isRequired,
+};

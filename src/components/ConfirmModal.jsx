@@ -16,8 +16,17 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onCancel} role="dialog" aria-modal="true">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+    <dialog
+      open
+      className="modal-overlay"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onCancel();
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onCancel();
+      }}
+    >
+      <div className="modal-content" style={{ maxWidth: '400px' }}>
         <div className="modal-header">
           <h3>{title}</h3>
           <button type="button" className="btn-close" onClick={onCancel}>✕</button>
@@ -37,7 +46,7 @@ export default function ConfirmModal({
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 

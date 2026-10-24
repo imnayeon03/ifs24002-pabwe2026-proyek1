@@ -8,7 +8,7 @@ export default function ToastNotification({ toast, onClose }) {
   if (!toast) return null;
 
   return (
-    <div className="toast-notification" onClick={onClose} role="alert" aria-live="assertive">
+    <div className="toast-notification" role="alert" aria-live="assertive">
       <div className="toast-icon" aria-hidden="true">{getNotifIcon(toast.tipe)}</div>
       <div className="toast-body">
         <b>{toast.judul}</b>
@@ -18,7 +18,7 @@ export default function ToastNotification({ toast, onClose }) {
         type="button"
         className="toast-close"
         aria-label="Tutup notifikasi"
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        onClick={onClose}
       >
         ✕
       </button>
