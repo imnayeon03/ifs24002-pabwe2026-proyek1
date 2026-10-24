@@ -1,22 +1,21 @@
+import PropTypes from 'prop-types';
+import { getNotifIcon } from '../utils/notifications';
+
 /**
- * Toast notifikasi — muncul di pojok layar saat ada notifikasi baru.
+ * Toast notifikasi presentasional.
  */
 export default function ToastNotification({ toast, onClose }) {
   if (!toast) return null;
 
-  const icon =
-    toast.tipe === 'pembayaran' ? '💳' :
-    toast.tipe === 'pengiriman' ? '🚚' :
-    toast.tipe === 'penerimaan' ? '✅' : '🔔';
-
   return (
     <div className="toast-notification" onClick={onClose} role="alert" aria-live="assertive">
-      <div className="toast-icon" aria-hidden="true">{icon}</div>
+      <div className="toast-icon" aria-hidden="true">{getNotifIcon(toast.tipe)}</div>
       <div className="toast-body">
         <b>{toast.judul}</b>
         <p>{toast.pesan}</p>
       </div>
       <button
+        type="button"
         className="toast-close"
         aria-label="Tutup notifikasi"
         onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -26,3 +25,12 @@ export default function ToastNotification({ toast, onClose }) {
     </div>
   );
 }
+
+ToastNotification.propTypes = {
+  toast: PropTypes.shape({
+    judul: PropTypes.string.isRequired,
+    pesan: PropTypes.string.isRequired,
+    tipe: PropTypes.string,
+  }),
+  onClose: PropTypes.func.isRequired,
+};

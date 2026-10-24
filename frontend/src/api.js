@@ -1,17 +1,18 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { config } from './config';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
+  baseURL: config.apiBaseUrl,
 });
 
 // Request Interceptor: Lampirkan JWT token jika tersedia
-api.interceptors.request.use((config) => {
+api.interceptors.request.use((reqConfig) => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    reqConfig.headers.Authorization = `Bearer ${token}`;
   }
-  return config;
+  return reqConfig;
 });
 
 // Response Interceptor: Tangani error global secara terpusat (misal 401 Unauthorized / Token expired)

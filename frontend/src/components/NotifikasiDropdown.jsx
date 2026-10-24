@@ -1,18 +1,10 @@
 import PropTypes from 'prop-types';
+import { getNotifIcon } from '../utils/notifications';
 
 export default function NotifikasiDropdown({ isOpen, onClose, notifications, onMarkAllRead, onMarkRead }) {
   if (!isOpen) return null;
 
   const unreadCount = notifications.filter((n) => !n.dibaca).length;
-
-  const getIcon = (tipe) => {
-    switch (tipe) {
-      case 'pembayaran': return '💳';
-      case 'pengiriman': return '🚚';
-      case 'penerimaan': return '✅';
-      default: return '🔔';
-    }
-  };
 
   return (
     <div className="notif-dropdown" role="region" aria-label="Daftar Notifikasi">
@@ -39,7 +31,7 @@ export default function NotifikasiDropdown({ isOpen, onClose, notifications, onM
               className={`notif-item ${n.dibaca ? 'read' : 'unread'}`}
               onClick={() => !n.dibaca && onMarkRead(n.id)}
             >
-              <div className="notif-icon">{getIcon(n.tipe)}</div>
+              <div className="notif-icon">{getNotifIcon(n.tipe)}</div>
               <div className="notif-content">
                 <div className="notif-title">{n.judul}</div>
                 <div className="notif-message">{n.pesan}</div>
