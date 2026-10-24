@@ -7,7 +7,7 @@ vi.mock('../api', () => ({
 }));
 
 describe('PesananMasukCard Component', () => {
-  const order = {
+  const baseOrder = {
     id: 10,
     nomor_antrean: 3,
     pemesan: 'Esgul',
@@ -21,9 +21,16 @@ describe('PesananMasukCard Component', () => {
     items: [{ menu_id: 1, nama: 'Ayam Penyet', harga: 25000, jumlah: 1 }],
   };
 
-  it('renders order details and triggers status change', () => {
+  it('renders order details, handles status change, and triggers send confirmation', () => {
     const onUbahStatus = vi.fn();
-    render(<PesananMasukCard order={order} onUbahStatus={onUbahStatus} onKonfirmasiKirimClick={vi.fn()} />);
+    const onKonfirmasiKirimClick = vi.fn();
+    render(
+      <PesananMasukCard
+        order={baseOrder}
+        onUbahStatus={onUbahStatus}
+        onKonfirmasiKirimClick={onKonfirmasiKirimClick}
+      />
+    );
 
     expect(screen.getByText(/#3 · Esgul · ambil 12:00/)).toBeTruthy();
     expect(screen.getByText(/Sudah Dibayar \(QRIS\)/)).toBeTruthy();
@@ -32,26 +39,66 @@ describe('PesananMasukCard Component', () => {
     const siapBtn = screen.getByRole('button', { name: 'Siap' });
     fireEvent.click(siapBtn);
     expect(onUbahStatus).toHaveBeenCalledWith(10, 'Siap');
-  });
-
-  it('triggers send confirmation click when not yet sent', () => {
-    const onKonfirmasiKirimClick = vi.fn();
-    render(<PesananMasukCard order={order} onUbahStatus={vi.fn()} onKonfirmasiKirimClick={onKonfirmasiKirimClick} />);
 
     const kirimBtn = screen.getByRole('button', { name: /Konfirmasi Sudah Mengirim Pesanan/i });
     fireEvent.click(kirimBtn);
-    expect(onKonfirmasiKirimClick).toHaveBeenCalledWith(order);
+    expect(onKonfirmasiKirimClick).toHaveBeenCalledWith(baseOrder);
   });
 
-  it('shows badge when order is already sent or completed', () => {
+  it('renders unpaid order correctly', () => {
+    const unpaidOrder = {
+      ...baseOrder,
+      status_pembayaran: 'Belum Dibayar',
+      waktu_bayar: null,
+    };
+
+    render(
+      <PesananMasukCard
+        order={unpaidOrder}
+        onUbahStatus={vi.fn()}
+        onKonfirmasiKirimClick={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('⏳ Belum Dibayar')).toBeTruthy();
+  });
+
+  it('shows delivery waiting note when order is sent', () => {
     const sentOrder = {
-      ...order,
+      ...baseOrder,
       status: 'Dikirim',
       waktu_kirim: '2026-10-24 12:15',
     };
-    render(<PesananMasukCard order={sentOrder} onUbahStatus={vi.fn()} onKonfirmasiKirimClick={vi.fn()} />);
+    render(
+      <PesananMasukCard
+        order={sentOrder}
+        onUbahStatus={vi.fn()}
+        onKonfirmasiKirimClick={vi.fn()}
+      />
+    );
 
     expect(screen.getByText(/Pesanan Sedang Dikirim/)).toBeTruthy();
+    expect(screen.getByText(/Dikirim: 2026-10-24 12:15/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Konfirmasi Sudah Mengirim Pesanan/i })).toBeNull();
+  });
+
+  it('shows completion note when order is finished', () => {
+    const completedOrder = {
+      ...baseOrder,
+      status: 'Selesai',
+      waktu_kirim: '2026-10-24 12:15',
+      waktu_selesai: '2026-10-24 12:30',
+    };
+    render(
+      <PesananMasukCard
+        order={completedOrder}
+        onUbahStatus={vi.fn()}
+        onKonfirmasiKirimClick={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText(/Pesanan Selesai/)).toBeTruthy();
+    expect(screen.getByText(/Diterima: 2026-10-24 12:30/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Konfirmasi Sudah Mengirim Pesanan/i })).toBeNull();
   });
 });

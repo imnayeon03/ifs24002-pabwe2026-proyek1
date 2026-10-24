@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api';
 import { hardRedirect } from '../utils/navigation';
@@ -77,6 +77,37 @@ describe('Login (mode masuk)', () => {
     expect(hardRedirect).not.toHaveBeenCalled();
     expect(localStorage.getItem('token')).toBeNull();
   });
+
+  it('bisa berganti mode dengan tombol switch mode', () => {
+    renderLogin('/auth/login');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Masuk');
+
+    const switchBtn = document.getElementById('btn-switch-mode');
+    fireEvent.click(switchBtn);
+
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Daftar Mahasiswa');
+
+    fireEvent.click(document.getElementById('btn-switch-mode'));
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Masuk');
+  });
+
+  it('merespons perubahan lokasi URL pathname via effect', () => {
+    function AppWrapper() {
+      return (
+        <MemoryRouter initialEntries={['/auth/login']}>
+          <Link to="/auth/register" data-testid="link-reg">Go Register</Link>
+          <AuthProvider>
+            <Login />
+          </AuthProvider>
+        </MemoryRouter>
+      );
+    }
+    render(<AppWrapper />);
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Masuk');
+
+    fireEvent.click(screen.getByTestId('link-reg'));
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Daftar Mahasiswa');
+  });
 });
 
 describe('Login (mode daftar)', () => {
@@ -91,7 +122,7 @@ describe('Login (mode daftar)', () => {
     expect(api.post).not.toHaveBeenCalled();
   });
 
-  it('mendaftar dengan data valid', async () => {
+  it('mendaftar dengan data valid dan nama terisi', async () => {
     api.post.mockResolvedValue({ data: { token: 't', user: { nama: 'Edwin', role: 'mahasiswa' } } });
     renderLogin('/auth/register');
     type('Nama', 'Edwin');

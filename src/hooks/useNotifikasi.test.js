@@ -17,52 +17,102 @@ vi.mock('../api', () => ({
 }));
 
 describe('useNotifikasi Hook', () => {
-  const notifs1 = [
-    { id: 1, judul: 'Pesanan Dibuat', pesan: 'Pesanan #10 dibuat', tipe: 'pembayaran', dibaca: 1 },
-  ];
-  const notifs2 = [
-    { id: 2, judul: 'Pesanan Dikirim', pesan: 'Pesanan #10 dikirim', tipe: 'pengiriman', dibaca: 0 },
-    { id: 1, judul: 'Pesanan Dibuat', pesan: 'Pesanan #10 dibuat', tipe: 'pembayaran', dibaca: 1 },
-  ];
+  it('handles empty list and triggers toast on subsequent unread notification', async () => {
+    vi.useFakeTimers();
 
-  it('polls notifications, triggers toast on new unread item, and marks read', async () => {
-    api.get.mockResolvedValueOnce({ data: notifs1 });
+    // 1. Polling pertama: list kosong
+    api.get.mockResolvedValueOnce({ data: [] });
+
+    const user = { id: 1 };
+    const { result } = renderHook(() => useNotifikasi(user));
+
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+    });
+
+    // 2. Polling kedua: notifikasi awal (id: 10, dibaca: 1)
+    api.get.mockResolvedValueOnce({
+      data: [{ id: 10, judul: 'Pesanan Dibuat', pesan: 'Pesanan #10', dibaca: 1 }],
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    // 3. Polling ketiga: notifikasi baru muncul (id: 11 > 10, dibaca: 0)
+    api.get.mockResolvedValueOnce({
+      data: [
+        { id: 11, judul: 'Pesanan Dikirim', pesan: 'Pesanan #10 sedang dikirim', dibaca: 0, tipe: 'pengiriman' },
+        { id: 10, judul: 'Pesanan Dibuat', pesan: 'Pesanan #10', dibaca: 1 },
+      ],
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(toast).toHaveBeenCalledWith(
+      'Pesanan Dikirim: Pesanan #10 sedang dikirim',
+      expect.objectContaining({ icon: '🚚', duration: 5000 })
+    );
+
+    vi.useRealTimers();
+  });
+
+  it('marks single notification as read and handles catch error', async () => {
+    api.get.mockResolvedValueOnce({
+      data: [{ id: 5, judul: 'Test', pesan: 'Pesan', dibaca: 0 }],
+    });
     api.patch.mockResolvedValueOnce({ data: { message: 'ok' } });
+
+    const user = { id: 1 };
+    const { result } = renderHook(() => useNotifikasi(user));
+
+    await waitFor(() => {
+      expect(result.current.unreadCount).toBe(1);
+    });
+
+    // Sukses markRead
+    await act(async () => {
+      await result.current.markRead(5);
+    });
+    expect(api.patch).toHaveBeenCalledWith('/notifications/5/baca');
+    expect(result.current.unreadCount).toBe(0);
+
+    // Gagal markRead (catch block)
+    api.patch.mockRejectedValueOnce(new Error('Network fail'));
+    await act(async () => {
+      await result.current.markRead(5);
+    });
+  });
+
+  it('marks all notifications as read and handles catch error', async () => {
+    api.get.mockResolvedValueOnce({
+      data: [
+        { id: 1, judul: 'N1', pesan: 'P1', dibaca: 0 },
+        { id: 2, judul: 'N2', pesan: 'P2', dibaca: 0 },
+      ],
+    });
     api.post.mockResolvedValueOnce({ data: { message: 'ok' } });
 
     const user = { id: 1 };
-    const { result, rerender } = renderHook(() => useNotifikasi(user));
+    const { result } = renderHook(() => useNotifikasi(user));
 
     await waitFor(() => {
-      expect(result.current.notifications.length).toBe(1);
+      expect(result.current.unreadCount).toBe(2);
     });
 
-    // Simulasi polling update dengan notifikasi baru (id: 2 > 1 dan unread)
-    api.get.mockResolvedValueOnce({ data: notifs2 });
-    rerender();
-
-    // Mark single as read
-    await act(async () => {
-      await result.current.markRead(2);
-    });
-    expect(api.patch).toHaveBeenCalledWith('/notifications/2/baca');
-
-    // Mark all as read
+    // Sukses markAllRead
     await act(async () => {
       await result.current.markAllRead();
     });
     expect(api.post).toHaveBeenCalledWith('/notifications/baca-semua');
-  });
+    expect(result.current.unreadCount).toBe(0);
 
-  it('announces newest notification toast', async () => {
-    let onDataCallback;
-    // Panggil useNotifikasi dengan mock data sequence
-    api.get.mockResolvedValueOnce({ data: [{ id: 5, judul: 'Awal', pesan: 'Msg', dibaca: 1 }] });
-    api.get.mockResolvedValueOnce({ data: [{ id: 6, judul: 'Baru', pesan: 'Ada pesanan', dibaca: 0, tipe: 'pengiriman' }] });
-
-    const { result } = renderHook(() => useNotifikasi({ id: 9 }));
-    await waitFor(() => {
-      expect(result.current.notifications).toBeDefined();
+    // Gagal markAllRead (catch block)
+    api.post.mockRejectedValueOnce(new Error('Network fail'));
+    await act(async () => {
+      await result.current.markAllRead();
     });
   });
 });

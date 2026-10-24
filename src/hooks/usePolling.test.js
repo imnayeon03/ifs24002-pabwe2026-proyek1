@@ -41,13 +41,32 @@ describe('usePolling', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('tidak berhenti walau callback melempar error', async () => {
+  it('tidak berhenti walau callback melempar asynchronous error', async () => {
     const fn = vi.fn().mockRejectedValue(new Error('jaringan putus'));
     renderHook(() => usePolling(fn, 1000));
     await act(async () => {
       await vi.advanceTimersByTimeAsync(2000);
     });
     expect(fn).toHaveBeenCalledTimes(3);
+  });
+
+  it('menangkap synchronous error yang dilempar callback tanpa crash', () => {
+    const errorFn = vi.fn(() => {
+      throw new Error('sync error test');
+    });
+    expect(() => renderHook(() => usePolling(errorFn, 1000))).not.toThrow();
+    expect(errorFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('aman saat unmount ketika async callback masih pending', async () => {
+    let resolvePromise;
+    const slowFn = vi.fn(() => new Promise((resolve) => { resolvePromise = resolve; }));
+
+    const { unmount } = renderHook(() => usePolling(slowFn, 1000));
+    expect(slowFn).toHaveBeenCalledTimes(1);
+
+    unmount();
+    if (resolvePromise) resolvePromise();
   });
 
   it('selalu memakai versi callback terbaru tanpa mereset timer', async () => {
