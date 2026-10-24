@@ -49,3 +49,15 @@ describe('Notifikasi Page Component', () => {
     });
   });
 });
+
+describe('Notifikasi Page Component - respons tanpa data', () => {
+  it('menganggap data null sebagai daftar kosong', async () => {
+    api.get.mockResolvedValueOnce({ data: null });
+
+    render(<Notifikasi />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Belum ada notifikasi.')).toBeTruthy();
+    });
+  });
+});

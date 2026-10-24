@@ -83,3 +83,25 @@ describe('usePolling', () => {
     expect(second).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('usePolling - tick yang terlanjur terjadwal', () => {
+  it('tidak menjalankan callback jika tick timer terpanggil setelah unmount', async () => {
+    const fn = vi.fn();
+    let tick;
+    const originalSetInterval = globalThis.setInterval;
+    const spy = vi.spyOn(globalThis, 'setInterval').mockImplementation((cb, ms) => {
+      tick = cb;
+      return originalSetInterval(cb, ms);
+    });
+
+    const { unmount } = renderHook(() => usePolling(fn, 1000));
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    unmount();
+    tick();
+    await Promise.resolve();
+
+    expect(fn).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  });
+});

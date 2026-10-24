@@ -63,3 +63,26 @@ describe('PesananCard Component', () => {
     expect(screen.getByText(/Selesai pada 2026-10-24 13:00/)).toBeTruthy();
   });
 });
+
+describe('PesananCard - data opsional', () => {
+  const order = {
+    id: 2,
+    kios_nama: 'Kios Es',
+    nomor_antrean: 8,
+    status: 'Diterima',
+    status_pembayaran: 'Sudah Dibayar',
+    total: 5000,
+    jam_ambil: '10:00',
+    created_at: '2026-10-24 09:00',
+  };
+
+  it('tidak crash dan tidak menampilkan item jika items tidak ada', () => {
+    const { container } = render(<PesananCard order={order} />);
+    expect(container.querySelectorAll('li')).toHaveLength(0);
+  });
+
+  it('memakai QRIS sebagai metode default pada pesanan lunas tanpa metode', () => {
+    render(<PesananCard order={order} />);
+    expect(screen.getByText(/Lunas \(QRIS\)/)).toBeTruthy();
+  });
+});
