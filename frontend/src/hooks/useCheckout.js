@@ -1,39 +1,39 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import api, { errMsg } from '../api';
+import { useAsyncAction } from './useAsyncAction';
 
 /**
- * Custom hook untuk alur checkout pesanan dari keranjang.
- * Memisahkan logika API & navigasi dari halaman Keranjang.jsx.
+ * Alur checkout pesanan dari keranjang.
  */
 export function useCheckout(onSuccess) {
-  const [loading, setLoading] = useState(false);
+  const { loading, run } = useAsyncAction();
   const [error, setError] = useState('');
   const nav = useNavigate();
 
   const checkout = async ({ cart, jam, metode, statusBayar = 'Sudah Dibayar' }) => {
     setError('');
-    setLoading(true);
     try {
-      await api.post('/orders', {
-        jam_ambil: jam,
-        metode_pembayaran: metode,
-        status_pembayaran: statusBayar,
-        items: cart.map((x) => ({ menu_id: x.menu.id, jumlah: x.jumlah })),
-      });
-      toast.success(statusBayar === 'Sudah Dibayar' ? 'Pesanan berhasil dibuat & dibayar!' : 'Pesanan berhasil dibuat!');
-      if (onSuccess) onSuccess();
-      nav('/riwayat');
-      return true;
+      await run(
+        () =>
+          api.post('/orders', {
+            jam_ambil: jam,
+            metode_pembayaran: metode,
+            status_pembayaran: statusBayar,
+            items: cart.map((x) => ({ menu_id: x.menu.id, jumlah: x.jumlah })),
+          }),
+        {
+          success: statusBayar === 'Sudah Dibayar' ? 'Pesanan berhasil dibuat & dibayar!' : 'Pesanan berhasil dibuat!',
+          rethrow: true,
+        }
+      );
     } catch (e) {
-      const msg = errMsg(e);
-      setError(msg);
-      toast.error(msg);
+      setError(errMsg(e));
       throw e;
-    } finally {
-      setLoading(false);
     }
+    onSuccess?.();
+    nav('/riwayat');
+    return true;
   };
 
   return { checkout, loading, error };

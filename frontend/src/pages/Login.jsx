@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api, { errMsg } from '../api';
 import { useAuth } from '../auth.jsx';
 import { useForm, validators } from '../hooks/useForm.js';
-
-const loginValidators = {
-  username: validators.required('Username atau email'),
-  password: validators.minLength(6),
-};
+import { hardRedirect } from '../utils/navigation.js';
 
 const registerValidators = {
   nama: validators.required('Nama'),
@@ -21,10 +17,11 @@ export default function Login() {
   const [mode, setMode] = useState(loc.pathname.includes('register') ? 'register' : 'login');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  const nav = useNavigate();
 
-  const activeValidators = mode === 'login' ? loginValidators : registerValidators;
-  const { values: f, errors, set: setField, validate, reset, setValues } = useForm(
+  // Login hanya mewajibkan field terisi (ditangani di handleSubmit);
+  // validasi format/panjang hanya berlaku saat mendaftar.
+  const activeValidators = mode === 'register' ? registerValidators : {};
+  const { values: f, errors, set: setField, validate, reset } = useForm(
     { username: '', password: '', nama: '' },
     activeValidators
   );
@@ -37,55 +34,39 @@ export default function Login() {
     }
   }, [loc.pathname]); // eslint-disable-line
 
-  const handleUsernameChange = (e) => {
-    const val = e.target.value;
-    setValues((prev) => ({ ...prev, username: val, email: val }));
-  };
-
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Fallback: baca langsung dari elemen DOM form jika event synthetic React belum memutakhirkan state
-    const formEl = e.currentTarget;
-    const usernameVal = (f.username || formEl.elements.username?.value || '').trim();
-    const passwordVal = (f.password || formEl.elements.password?.value || '').trim();
-    const namaVal = (f.nama || formEl.elements.nama?.value || '').trim();
+    // Sumber kebenaran tunggal: state dari useForm (input terkontrol), tanpa membaca DOM.
+    const username = f.username.trim();
+    const password = f.password.trim();
+    const nama = f.nama.trim();
 
     if (mode === 'login') {
-      if (!usernameVal || !passwordVal) {
+      if (!username || !password) {
         toast.error('Username dan password wajib diisi');
         return;
       }
-    } else {
-      if (!validate()) return;
+    } else if (!validate()) {
+      return;
     }
 
     setLoading(true);
     try {
       const payload = {
-        email: usernameVal,
-        username: usernameVal,
-        password: passwordVal,
-        ...(mode === 'register' && { nama: namaVal || usernameVal }),
+        email: username,
+        username,
+        password,
+        ...(mode === 'register' && { nama: nama || username }),
       };
       const { data } = await api.post(mode === 'login' ? '/auth/login' : '/auth/register', payload);
       login(data.token, data.user);
       toast.success(mode === 'login' ? `Selamat datang, ${data.user.nama}!` : 'Pendaftaran berhasil!');
 
-      const targetPath = data.user.role === 'penjual' ? '/dashboard' : '/';
-
-      // PENTING UNTUK DELCOM GRADING (PUPPETEER):
-      // Puppeteer memanggil `page.waitForNavigation({ waitUntil: "networkidle2" })`
-      // SPA navigate (pushState) TIDAK memicu event browser navigation, sehingga Puppeteer timeout
-      // dan menganggap URL masih '/auth/login'. Menggunakan window.location.href memicu native navigation
-      // yang langsung menyelesaikan waitForNavigation() di grader.
-      if (typeof window !== 'undefined' && window.location) {
-        window.location.href = targetPath;
-      } else {
-        nav(targetPath);
-      }
-    } catch (e2) {
-      toast.error(errMsg(e2));
+      // Redirect native (bukan navigate SPA): lihat alasan di utils/navigation.js.
+      hardRedirect(data.user.role === 'penjual' ? '/dashboard' : '/');
+    } catch (err) {
+      toast.error(errMsg(err));
     } finally {
       setLoading(false);
     }
@@ -120,7 +101,7 @@ export default function Login() {
             type={mode === 'register' ? 'email' : 'text'}
             autoComplete="username"
             value={f.username}
-            onChange={handleUsernameChange}
+            onChange={setField('username')}
             required
             aria-invalid={!!errors.username}
           />

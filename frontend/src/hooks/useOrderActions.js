@@ -1,79 +1,44 @@
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-import api, { errMsg } from '../api';
+import api from '../api';
+import { useAsyncAction } from './useAsyncAction';
 
 /**
- * Custom hook untuk aksi-aksi pesanan (bayar, kirim, terima, ubah status).
- * Memisahkan pemanggilan API pesanan dari komponen presentasional.
+ * Aksi-aksi pesanan (bayar, kirim, terima, ubah status).
+ * Semua aksi berbagi satu pola lewat useAsyncAction + helper `exec`.
  */
 export function useOrderActions(onSuccess) {
-  const [loadingAction, setLoadingAction] = useState(false);
+  const { loading: loadingAction, run } = useAsyncAction();
 
-  const bayarOrder = async (orderId, orderNo, metode) => {
-    setLoadingAction(true);
-    try {
-      await api.post(`/orders/${orderId}/bayar`, { metode_pembayaran: metode });
-      toast.success(`Pembayaran #${orderNo} berhasil! Penjual telah menerima notifikasi.`);
-      if (onSuccess) onSuccess();
-      return true;
-    } catch (e) {
-      toast.error(errMsg(e));
-      throw e;
-    } finally {
-      setLoadingAction(false);
-    }
+  const exec = async (request, success, options) => {
+    const ok = await run(request, { success, ...options });
+    if (ok) onSuccess?.();
+    return ok;
   };
 
-  const konfirmasiKirim = async (orderId, orderNo) => {
-    setLoadingAction(true);
-    try {
-      await api.post(`/orders/${orderId}/kirim`);
-      toast.success(`Pesanan #${orderNo} berhasil dikonfirmasi sudah dikirim!`);
-      if (onSuccess) onSuccess();
-      return true;
-    } catch (e) {
-      toast.error(errMsg(e));
-      return false;
-    } finally {
-      setLoadingAction(false);
-    }
-  };
+  // rethrow: true agar pemanggil (modal bayar) tahu pembayaran gagal dan tidak menutup modal
+  const bayarOrder = (orderId, orderNo, metode) =>
+    exec(
+      () => api.post(`/orders/${orderId}/bayar`, { metode_pembayaran: metode }),
+      `Pembayaran #${orderNo} berhasil! Penjual telah menerima notifikasi.`,
+      { rethrow: true }
+    );
 
-  const konfirmasiTerima = async (orderId, orderNo) => {
-    setLoadingAction(true);
-    try {
-      await api.post(`/orders/${orderId}/konfirmasi-terima`);
-      toast.success(`Pesanan #${orderNo} berhasil dikonfirmasi diterima. Terima kasih!`);
-      if (onSuccess) onSuccess();
-      return true;
-    } catch (e) {
-      toast.error(errMsg(e));
-      return false;
-    } finally {
-      setLoadingAction(false);
-    }
-  };
+  const konfirmasiKirim = (orderId, orderNo) =>
+    exec(
+      () => api.post(`/orders/${orderId}/kirim`),
+      `Pesanan #${orderNo} berhasil dikonfirmasi sudah dikirim!`
+    );
 
-  const ubahStatus = async (orderId, status) => {
-    setLoadingAction(true);
-    try {
-      await api.patch(`/orders/${orderId}/status`, { status });
-      toast.success(`Status pesanan diubah ke "${status}"`);
-      if (onSuccess) onSuccess();
-      return true;
-    } catch (e) {
-      toast.error(errMsg(e));
-      return false;
-    } finally {
-      setLoadingAction(false);
-    }
-  };
+  const konfirmasiTerima = (orderId, orderNo) =>
+    exec(
+      () => api.post(`/orders/${orderId}/konfirmasi-terima`),
+      `Pesanan #${orderNo} berhasil dikonfirmasi diterima. Terima kasih!`
+    );
 
-  return {
-    loadingAction,
-    bayarOrder,
-    konfirmasiKirim,
-    konfirmasiTerima,
-    ubahStatus,
-  };
+  const ubahStatus = (orderId, status) =>
+    exec(
+      () => api.patch(`/orders/${orderId}/status`, { status }),
+      `Status pesanan diubah ke "${status}"`
+    );
+
+  return { loadingAction, bayarOrder, konfirmasiKirim, konfirmasiTerima, ubahStatus };
 }

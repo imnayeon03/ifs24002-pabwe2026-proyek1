@@ -1,6 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { config } from './config';
+import { hardRedirect } from './utils/navigation';
 
 const api = axios.create({
   baseURL: config.apiBaseUrl,
@@ -31,9 +32,7 @@ api.interceptors.response.use(
 
         // Redirect ke login jika bukan di halaman login
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          setTimeout(() => {
-            window.location.href = '/auth/login';
-          }, 800);
+          setTimeout(() => hardRedirect('/auth/login'), 800);
         }
       }
     }

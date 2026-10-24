@@ -1,28 +1,13 @@
-import { useCallback, useState } from 'react';
-import api, { errMsg } from '../api';
-import { usePolling } from './usePolling';
+import api from '../api';
+import { usePollingResource } from './usePollingResource';
+
+const fetchOrders = () => api.get('/orders').then((r) => r.data);
 
 /**
- * Custom hook untuk fetch & polling daftar pesanan.
- * Menggantikan logika polling yang duplikat di Riwayat.jsx & Dashboard.jsx.
+ * Daftar pesanan dengan polling berkala (dipakai Riwayat & Dashboard).
  * @param {number} intervalMs - Interval polling (default 5000ms)
  */
 export function useOrders(intervalMs = 5000) {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const fetchOrders = useCallback(() => {
-    api.get('/orders')
-      .then((r) => {
-        setOrders(r.data || []);
-        setError('');
-      })
-      .catch((e) => setError(errMsg(e)))
-      .finally(() => setLoading(false));
-  }, []);
-
-  usePolling(fetchOrders, intervalMs);
-
-  return { orders, loading, error, reload: fetchOrders };
+  const { data, loading, error, reload } = usePollingResource(fetchOrders, { intervalMs });
+  return { orders: data, loading, error, reload };
 }

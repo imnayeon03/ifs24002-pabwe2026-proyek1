@@ -1,70 +1,34 @@
-import { useState, useCallback } from 'react';
-import toast from 'react-hot-toast';
-import api, { errMsg } from '../api';
-import { usePolling } from './usePolling';
+import api from '../api';
+import { useAsyncAction } from './useAsyncAction';
+import { usePollingResource } from './usePollingResource';
 
 /**
- * Custom hook untuk manajemen menu kios penjual.
- * Memisahkan state & pemanggilan API menu dari Dashboard.jsx.
+ * Manajemen menu kios penjual: daftar menu (polling) + simpan/hapus.
  */
 export function useMenu(kiosId) {
-  const [menu, setMenu] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const loadMenu = useCallback(() => {
-    if (!kiosId) return;
-    api.get('/menu', { params: { kios_id: kiosId } })
-      .then((r) => setMenu(r.data || []))
-      .catch(() => {});
-  }, [kiosId]);
-
-  usePolling(loadMenu, 5000, !!kiosId);
+  const { data: menu, reload } = usePollingResource(
+    () => (kiosId ? api.get('/menu', { params: { kios_id: kiosId } }).then((r) => r.data) : []),
+    { enabled: !!kiosId }
+  );
+  const { loading, run } = useAsyncAction();
 
   const saveMenu = async (menuData, editId = null) => {
-    setLoading(true);
-    const body = {
-      ...menuData,
-      harga: Number(menuData.harga),
-      stok: Number(menuData.stok),
-    };
-    try {
-      if (editId) {
-        await api.put(`/menu/${editId}`, { ...body, tersedia: true });
-        toast.success(`Menu "${body.nama}" berhasil diperbarui`);
-      } else {
-        await api.post('/menu', body);
-        toast.success(`Menu "${body.nama}" berhasil ditambahkan`);
-      }
-      loadMenu();
-      return true;
-    } catch (e) {
-      toast.error(errMsg(e));
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    const body = { ...menuData, harga: Number(menuData.harga), stok: Number(menuData.stok) };
+    const ok = await run(
+      () => (editId ? api.put(`/menu/${editId}`, { ...body, tersedia: true }) : api.post('/menu', body)),
+      { success: `Menu "${body.nama}" berhasil ${editId ? 'diperbarui' : 'ditambahkan'}` }
+    );
+    if (ok) reload();
+    return ok;
   };
 
   const deleteMenu = async (id, nama) => {
-    setLoading(true);
-    try {
-      await api.delete(`/menu/${id}`);
-      toast.success(`Menu ${nama ? `"${nama}" ` : ''}telah dihapus`);
-      loadMenu();
-      return true;
-    } catch (e) {
-      toast.error(errMsg(e));
-      return false;
-    } finally {
-      setLoading(false);
-    }
+    const ok = await run(() => api.delete(`/menu/${id}`), {
+      success: `Menu ${nama ? `"${nama}" ` : ''}telah dihapus`,
+    });
+    if (ok) reload();
+    return ok;
   };
 
-  return {
-    menu,
-    loading,
-    reloadMenu: loadMenu,
-    saveMenu,
-    deleteMenu,
-  };
+  return { menu, loading, reloadMenu: reload, saveMenu, deleteMenu };
 }

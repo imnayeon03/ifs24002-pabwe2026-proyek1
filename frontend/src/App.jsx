@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from './auth.jsx';
 import NavBar from './components/NavBar.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { useNotifikasi } from './hooks/useNotifikasi.js';
+import LoadingSpinner from './components/LoadingSpinner.jsx';
+// Login & Katalog tetap eager: keduanya pintu masuk aplikasi, lazy tidak memberi manfaat.
 import Login from './pages/Login.jsx';
 import Katalog from './pages/Katalog.jsx';
-import Keranjang from './pages/Keranjang.jsx';
-import Riwayat from './pages/Riwayat.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import Profil from './pages/Profil.jsx';
-import Notifikasi from './pages/Notifikasi.jsx';
+// Halaman lain dimuat saat dibutuhkan (code splitting per route).
+const Keranjang = lazy(() => import('./pages/Keranjang.jsx'));
+const Riwayat = lazy(() => import('./pages/Riwayat.jsx'));
+const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
+const Profil = lazy(() => import('./pages/Profil.jsx'));
+const Notifikasi = lazy(() => import('./pages/Notifikasi.jsx'));
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -49,18 +52,20 @@ export default function App() {
 
       <main>
         <ErrorBoundary>
-          <Routes>
-            <Route path="/" element={user?.role === 'penjual' ? <Navigate to="/dashboard" /> : <Katalog onAdd={add} cart={cart} />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/auth/login" element={<Login />} />
-            <Route path="/register" element={<Login />} />
-            <Route path="/auth/register" element={<Login />} />
-            <Route path="/keranjang" element={guard('mahasiswa', <Keranjang cart={cart} setCart={setCart} />)} />
-            <Route path="/riwayat" element={guard('mahasiswa', <Riwayat />)} />
-            <Route path="/dashboard" element={guard('penjual', <Dashboard />)} />
-            <Route path="/profil" element={guardAny(<Profil />)} />
-            <Route path="/notifikasi" element={guardAny(<Notifikasi />)} />
-          </Routes>
+          <Suspense fallback={<LoadingSpinner text="Memuat halaman..." />}>
+            <Routes>
+              <Route path="/" element={user?.role === 'penjual' ? <Navigate to="/dashboard" /> : <Katalog onAdd={add} cart={cart} />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/register" element={<Login />} />
+              <Route path="/auth/register" element={<Login />} />
+              <Route path="/keranjang" element={guard('mahasiswa', <Keranjang cart={cart} setCart={setCart} />)} />
+              <Route path="/riwayat" element={guard('mahasiswa', <Riwayat />)} />
+              <Route path="/dashboard" element={guard('penjual', <Dashboard />)} />
+              <Route path="/profil" element={guardAny(<Profil />)} />
+              <Route path="/notifikasi" element={guardAny(<Notifikasi />)} />
+            </Routes>
+          </Suspense>
         </ErrorBoundary>
       </main>
     </>

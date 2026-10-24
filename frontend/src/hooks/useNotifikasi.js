@@ -1,51 +1,51 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
 import toast from 'react-hot-toast';
 import api from '../api';
-import { usePolling } from './usePolling';
+import { usePollingResource } from './usePollingResource';
 import { getNotifIcon } from '../utils/notifications';
 
+const fetchNotifications = () => api.get('/notifications').then((r) => r.data);
+
 /**
- * Custom hook untuk mengelola notifikasi + react-hot-toast alert.
+ * Notifikasi + toast untuk notifikasi baru yang belum dibaca.
  */
 export function useNotifikasi(user) {
-  const [notifications, setNotifications] = useState([]);
   const lastIdRef = useRef(null);
 
-  const fetchNotif = useCallback(() => {
-    if (!user) return;
-    api.get('/notifications')
-      .then((r) => {
-        const data = r.data || [];
-        setNotifications(data);
-        if (data.length > 0) {
-          const newest = data[0];
-          if (lastIdRef.current !== null && newest.id > lastIdRef.current && !newest.dibaca) {
-            toast(`${newest.judul}: ${newest.pesan}`, {
-              icon: getNotifIcon(newest.tipe),
-              duration: 5000,
-            });
-          }
-          lastIdRef.current = newest.id;
-        }
-      })
-      .catch(() => {});
-  }, [user]);
-
-  usePolling(fetchNotif, 5000, !!user);
-
-  const markRead = useCallback(async (id) => {
-    try {
-      await api.patch(`/notifications/${id}/baca`);
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, dibaca: 1 } : n)));
-    } catch {}
+  const announceNewest = useCallback((list) => {
+    if (!list.length) return;
+    const newest = list[0];
+    if (lastIdRef.current !== null && newest.id > lastIdRef.current && !newest.dibaca) {
+      toast(`${newest.judul}: ${newest.pesan}`, { icon: getNotifIcon(newest.tipe), duration: 5000 });
+    }
+    lastIdRef.current = newest.id;
   }, []);
+
+  const { data: notifications, setData } = usePollingResource(fetchNotifications, {
+    enabled: !!user,
+    onData: announceNewest,
+  });
+
+  const markRead = useCallback(
+    async (id) => {
+      try {
+        await api.patch(`/notifications/${id}/baca`);
+        setData((prev) => prev.map((n) => (n.id === id ? { ...n, dibaca: 1 } : n)));
+      } catch {
+        // gagal menandai dibaca tidak kritis; polling berikutnya menyinkronkan ulang
+      }
+    },
+    [setData]
+  );
 
   const markAllRead = useCallback(async () => {
     try {
       await api.post('/notifications/baca-semua');
-      setNotifications((prev) => prev.map((n) => ({ ...n, dibaca: 1 })));
-    } catch {}
-  }, []);
+      setData((prev) => prev.map((n) => ({ ...n, dibaca: 1 })));
+    } catch {
+      // idem
+    }
+  }, [setData]);
 
   const unreadCount = notifications.filter((n) => !n.dibaca).length;
 
