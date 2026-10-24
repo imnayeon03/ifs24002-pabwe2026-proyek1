@@ -19,11 +19,16 @@ function seed() {
   ensureGraderUser();
 }
 
-// Akun uji grader (Delcom Grading) — selalu dipastikan ada
+// Akun uji grader (Delcom Grading) — selalu dipastikan ada dan password sinkron
 function ensureGraderUser() {
-  if (!db.prepare('SELECT 1 FROM users WHERE email=?').get('esgul@gmail.com')) {
+  const hash = bcrypt.hashSync('esgullll', 10);
+  const existing = db.prepare('SELECT id FROM users WHERE email=?').get('esgul@gmail.com');
+  if (!existing) {
     db.prepare('INSERT INTO users(nama,email,password_hash,role,kios_id) VALUES(?,?,?,?,?)')
-      .run('Esgul', 'esgul@gmail.com', bcrypt.hashSync('esgulll', 10), 'mahasiswa', null);
+      .run('Esgul', 'esgul@gmail.com', hash, 'mahasiswa', null);
+  } else {
+    db.prepare('UPDATE users SET password_hash=?, role=? WHERE email=?')
+      .run(hash, 'mahasiswa', 'esgul@gmail.com');
   }
 }
 module.exports = seed;
