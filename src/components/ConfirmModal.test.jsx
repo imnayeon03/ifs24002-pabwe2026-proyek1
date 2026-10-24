@@ -51,7 +51,13 @@ describe('ConfirmModal', () => {
     const { onCancel, container } = setup();
     fireEvent.click(container.querySelector('.modal-content'));
     expect(onCancel).not.toHaveBeenCalled();
-    fireEvent.click(container.querySelector('.modal-overlay'));
+    fireEvent.click(container.querySelector('.modal-backdrop'));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('tombol Escape menutup modal', () => {
+    const { onCancel } = setup();
+    fireEvent.keyDown(document, { key: 'Escape' });
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 

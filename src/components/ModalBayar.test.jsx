@@ -61,6 +61,17 @@ describe('ModalBayar Component', () => {
     expect(onConfirm).toHaveBeenCalledWith('QRIS');
   });
 
+  it('closes via backdrop click and Escape key', () => {
+    const onClose = vi.fn();
+    const { container } = render(<ModalBayar {...baseProps} onClose={onClose} />);
+
+    fireEvent.click(container.querySelector('.modal-backdrop'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
   it('handles loading state', () => {
     render(<ModalBayar {...baseProps} loading={true} />);
 

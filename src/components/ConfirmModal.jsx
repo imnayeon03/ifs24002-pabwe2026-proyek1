@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useEscapeKey } from '../hooks/useEscapeKey.js';
 
 /**
  * Reusable modal konfirmasi untuk menggantikan window.confirm() bawaan browser.
@@ -13,19 +14,13 @@ export default function ConfirmModal({
   cancelText = 'Batal',
   isDanger = false,
 }) {
+  useEscapeKey(onCancel, isOpen);
+
   if (!isOpen) return null;
 
   return (
-    <div
-      className="modal-overlay"
-      role="presentation"
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onCancel();
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onCancel();
-      }}
-    >
+    <div className="modal-overlay">
+      <button type="button" className="modal-backdrop" aria-label="Tutup dialog" tabIndex={-1} onClick={onCancel} />
       <dialog open className="modal-content" style={{ maxWidth: '400px' }}>
         <div className="modal-header">
           <h3>{title}</h3>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { rupiah } from '../api';
+import { useEscapeKey } from '../hooks/useEscapeKey.js';
 
 /**
  * Komponen presentasional untuk Modal Pembayaran.
@@ -8,6 +9,8 @@ import { rupiah } from '../api';
  */
 export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm, loading = false }) {
   const [metode, setMetode] = useState('QRIS');
+
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
 
@@ -17,16 +20,8 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
   };
 
   return (
-    <div
-      className="modal-overlay"
-      role="presentation"
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
+    <div className="modal-overlay">
+      <button type="button" className="modal-backdrop" aria-label="Tutup dialog" tabIndex={-1} onClick={onClose} />
       <dialog open className="modal-content">
         <div className="modal-header">
           <h3>Pembayaran Pesanan {orderNo ? `#${orderNo}` : ''}</h3>
