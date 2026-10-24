@@ -69,7 +69,7 @@ describe('Keranjang Component', () => {
     expect(setCart).toHaveBeenCalled();
   });
 
-  it('handles Bayar & Buat Pesanan flow with ModalBayar', async () => {
+  it('handles Bayar & Buat Pesanan flow with ModalBayar and close', async () => {
     render(<Keranjang cart={mockCart} setCart={vi.fn()} />);
 
     // Klik Bayar & Buat Pesanan -> modal terbuka
@@ -78,7 +78,13 @@ describe('Keranjang Component', () => {
 
     expect(screen.getByTestId('modal-bayar')).toBeTruthy();
 
-    // Konfirmasi di modal
+    // Tutup modal
+    const batalModalBtn = screen.getByText('Batal Modal');
+    fireEvent.click(batalModalBtn);
+    expect(screen.queryByTestId('modal-bayar')).toBeNull();
+
+    // Buka lagi lalu konfirmasi
+    fireEvent.click(bayarBtn);
     const confirmModalBtn = screen.getByText('Konfirmasi Modal');
     fireEvent.click(confirmModalBtn);
 
@@ -88,6 +94,21 @@ describe('Keranjang Component', () => {
         metode: 'Transfer Bank BCA',
         statusBayar: 'Sudah Dibayar',
       }));
+    });
+  });
+
+  it('handles checkout error in modal confirm', async () => {
+    checkoutMock.mockRejectedValueOnce(new Error('Gagal checkout'));
+    render(<Keranjang cart={mockCart} setCart={vi.fn()} />);
+
+    const bayarBtn = screen.getByText(/Bayar & Buat Pesanan/i);
+    fireEvent.click(bayarBtn);
+
+    const confirmModalBtn = screen.getByText('Konfirmasi Modal');
+    fireEvent.click(confirmModalBtn);
+
+    await waitFor(() => {
+      expect(checkoutMock).toHaveBeenCalled();
     });
   });
 
@@ -104,6 +125,21 @@ describe('Keranjang Component', () => {
         statusBayar: 'Belum Dibayar',
       }));
     });
+  });
+
+  it('does not proceed when validation fails', () => {
+    render(<Keranjang cart={mockCart} setCart={vi.fn()} />);
+
+    const jamInput = screen.getByLabelText(/Jam Pengambilan/i);
+    fireEvent.change(jamInput, { target: { value: '' } });
+
+    const bayarBtn = screen.getByText(/Bayar & Buat Pesanan/i);
+    fireEvent.click(bayarBtn);
+    expect(screen.queryByTestId('modal-bayar')).toBeNull();
+
+    const pesanDuluBtn = screen.getByText('Pesan Dulu (Bayar Nanti)');
+    fireEvent.click(pesanDuluBtn);
+    expect(checkoutMock).not.toHaveBeenCalled();
   });
 
   it('allows changing jam ambil and metode pembayaran', () => {
