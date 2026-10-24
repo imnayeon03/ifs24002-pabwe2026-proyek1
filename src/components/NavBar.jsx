@@ -62,7 +62,7 @@ export default function NavBar({
         )}
 
         {user ? (
-          <button id="btn-logout" onClick={onLogout}>
+          <button type="button" id="btn-logout" onClick={onLogout}>
             Keluar ({user.nama})
           </button>
         ) : (

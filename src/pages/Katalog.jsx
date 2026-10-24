@@ -59,7 +59,7 @@ export default function Katalog({ onAdd }) {
             <p className="muted">{m.kios_nama}</p>
             <p className="price">{rupiah(m.harga)}</p>
             <p className="muted small">Stok: {m.stok}</p>
-            <button className="primary" disabled={!m.tersedia || m.stok < 1 || !user} onClick={() => onAdd(m)}>
+            <button type="button" className="primary" disabled={!m.tersedia || m.stok < 1 || !user} onClick={() => onAdd(m)}>
               {getButtonLabel(m)}
             </button>
           </div>

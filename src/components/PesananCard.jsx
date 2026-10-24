@@ -9,7 +9,7 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
   const isPaid = o.status_pembayaran === 'Sudah Dibayar';
 
   return (
-    <div className="card" key={o.id}>
+    <div className="card">
       <div className="row">
         <div>
           <b>{o.kios_nama} · Antrean #{o.nomor_antrean}</b>
