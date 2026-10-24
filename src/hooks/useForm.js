@@ -42,7 +42,17 @@ export function useForm(initialValues, validators = {}) {
 /** Validator bawaan yang bisa dipakai ulang */
 export const validators = {
   required: (label) => (v) => (!v?.trim() ? `${label} wajib diisi` : null),
-  email: (v) => (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || '') ? 'Format email tidak valid' : null),
+  email: (v) => {
+    const val = (v || '').trim();
+    if (!val || val.length > 254) return 'Format email tidak valid';
+    const parts = val.split('@');
+    if (parts.length !== 2) return 'Format email tidak valid';
+    const [local, domain] = parts;
+    if (!local || !domain || local.includes(' ') || domain.includes(' ')) return 'Format email tidak valid';
+    const domainParts = domain.split('.');
+    if (domainParts.length < 2 || domainParts.some((p) => !p)) return 'Format email tidak valid';
+    return null;
+  },
   minLength: (n) => (v) => ((v || '').length < n ? `Minimal ${n} karakter` : null),
   positiveNumber: (label) => (v) => (isNaN(v) || Number(v) <= 0 ? `${label} harus lebih dari 0` : null),
   nonNegativeNumber: (label) => (v) => (isNaN(v) || Number(v) < 0 ? `${label} tidak boleh negatif` : null),
