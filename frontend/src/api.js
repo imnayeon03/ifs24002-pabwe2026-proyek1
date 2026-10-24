@@ -1,10 +1,46 @@
 import axios from 'axios';
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api' });
-api.interceptors.request.use((c) => {
-  const t = localStorage.getItem('token');
-  if (t) c.headers.Authorization = `Bearer ${t}`;
-  return c;
+import toast from 'react-hot-toast';
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
 });
+
+// Request Interceptor: Lampirkan JWT token jika tersedia
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response Interceptor: Tangani error global secara terpusat (misal 401 Unauthorized / Token expired)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      const requestUrl = error.config?.url || '';
+      const isAuthAttempt = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+
+      // Jika bukan saat mencoba login/register, berarti sesi token telah habis
+      if (!isAuthAttempt) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        toast.error('Sesi Anda telah berakhir. Silakan masuk kembali.');
+
+        // Redirect ke login jika bukan di halaman login
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          setTimeout(() => {
+            window.location.href = '/auth/login';
+          }, 800);
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const errMsg = (e) => e?.response?.data?.error || 'Terjadi kesalahan, coba lagi';
 export const rupiah = (n) => 'Rp' + Number(n).toLocaleString('id-ID');
+
 export default api;

@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Error Boundary — menangkap error di subtree React,
@@ -29,7 +30,7 @@ export default class ErrorBoundary extends Component {
         <div className="card narrow" style={{ textAlign: 'center', padding: '2rem' }} role="alert">
           <h2>⚠️ Terjadi Kesalahan</h2>
           <p className="muted">{this.state.error?.message || 'Halaman tidak dapat dimuat.'}</p>
-          <button className="primary" onClick={this.handleReset}>
+          <button type="button" className="primary" onClick={this.handleReset}>
             Coba Lagi
           </button>
         </div>
@@ -38,3 +39,7 @@ export default class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+};

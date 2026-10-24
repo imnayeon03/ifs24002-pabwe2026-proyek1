@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { rupiah } from '../api';
 import { useAuth } from '../auth.jsx';
 import { useOrders } from '../hooks/useOrders.js';
 import { useMenu } from '../hooks/useMenu.js';
@@ -7,8 +6,10 @@ import { useOrderActions } from '../hooks/useOrderActions.js';
 import { useForm, validators } from '../hooks/useForm.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 import ConfirmModal from '../components/ConfirmModal.jsx';
+import MenuForm from '../components/MenuForm.jsx';
+import MenuTable from '../components/MenuTable.jsx';
+import PesananMasukCard from '../components/PesananMasukCard.jsx';
 
-const STATUS = ['Diterima', 'Dimasak', 'Siap', 'Dikirim', 'Selesai'];
 const EMPTY_MENU = { nama: '', harga: '', kategori: 'Makanan', stok: '' };
 
 const menuValidators = {
@@ -17,155 +18,9 @@ const menuValidators = {
   stok: validators.nonNegativeNumber('Stok'),
 };
 
-/** Sub-komponen Presentasional: Form kelola menu */
-function MenuForm({ editId, form, errors, onSet, onSubmit, onBatal, loading }) {
-  return (
-    <form className="card filters" onSubmit={onSubmit} noValidate>
-      <div>
-        <input
-          placeholder="Nama menu"
-          value={form.nama}
-          onChange={onSet('nama')}
-          required
-          aria-invalid={!!errors.nama}
-        />
-        {errors.nama && <p className="error small">{errors.nama}</p>}
-      </div>
-      <div>
-        <input
-          type="number"
-          min="0"
-          placeholder="Harga (Rp)"
-          value={form.harga}
-          onChange={onSet('harga')}
-          required
-          aria-invalid={!!errors.harga}
-        />
-        {errors.harga && <p className="error small">{errors.harga}</p>}
-      </div>
-      <select value={form.kategori} onChange={onSet('kategori')}>
-        <option>Makanan</option>
-        <option>Minuman</option>
-        <option>Camilan</option>
-      </select>
-      <div>
-        <input
-          type="number"
-          min="0"
-          placeholder="Stok"
-          value={form.stok}
-          onChange={onSet('stok')}
-          required
-          aria-invalid={!!errors.stok}
-        />
-        {errors.stok && <p className="error small">{errors.stok}</p>}
-      </div>
-      <button className="primary" type="submit" disabled={loading}>
-        {loading ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Tambah Menu'}
-      </button>
-      {editId && (
-        <button type="button" onClick={onBatal} disabled={loading}>Batal</button>
-      )}
-    </form>
-  );
-}
-
-/** Sub-komponen Presentasional: Tabel menu */
-function MenuTable({ menu, onEdit, onHapusClick }) {
-  if (!menu.length) return <p className="muted">Belum ada menu.</p>;
-  return (
-    <table>
-      <thead>
-        <tr>
-          <th>Menu</th><th>Kategori</th><th>Harga</th><th>Stok</th><th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {menu.map((m) => (
-          <tr key={m.id}>
-            <td>{m.nama}</td>
-            <td>{m.kategori}</td>
-            <td>{rupiah(m.harga)}</td>
-            <td>{m.stok}</td>
-            <td>
-              <button onClick={() => onEdit(m)}>Ubah</button>
-              <button onClick={() => onHapusClick(m)}>Hapus</button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-/** Sub-komponen Presentasional: Kartu pesanan masuk */
-function PesananMasukCard({ order: o, onUbahStatus, onKonfirmasiKirimClick }) {
-  const isPaid = o.status_pembayaran === 'Sudah Dibayar';
-
-  return (
-    <div className="card">
-      <div className="row">
-        <div>
-          <b>#{o.nomor_antrean} · {o.pemesan} · ambil {o.jam_ambil}</b>
-          <div className="order-badges">
-            <span className={`status ${o.status}`}>{o.status}</span>
-            <span className={`badge-payment ${isPaid ? 'paid' : 'unpaid'}`}>
-              {isPaid ? `✅ Sudah Dibayar (${o.metode_pembayaran || 'QRIS'})` : '⏳ Belum Dibayar'}
-            </span>
-          </div>
-        </div>
-        <div className="price">{rupiah(o.total)}</div>
-      </div>
-
-      <p className="muted small">
-        Dipesan: {o.created_at}
-        {o.waktu_bayar && <span> · Dibayar: {o.waktu_bayar}</span>}
-        {o.waktu_kirim && <span> · Dikirim: {o.waktu_kirim}</span>}
-        {o.waktu_selesai && <span> · Diterima: {o.waktu_selesai}</span>}
-      </p>
-
-      <ul>
-        {(o.items || []).map((i) => (
-          <li key={i.menu_id}>{i.jumlah}× {i.nama} ({rupiah(i.harga)})</li>
-        ))}
-      </ul>
-
-      <div className="seller-order-footer">
-        <div className="status-button-group">
-          <span className="small muted">Ubah status: </span>
-          {STATUS.map((s) => (
-            <button
-              key={s}
-              disabled={s === o.status}
-              className={s === o.status ? 'active-status-btn' : ''}
-              onClick={() => onUbahStatus(o.id, s)}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-
-        {o.status !== 'Dikirim' && o.status !== 'Selesai' && (
-          <button type="button" className="btn-kirim" onClick={() => onKonfirmasiKirimClick(o)}>
-            🚚 Konfirmasi Sudah Mengirim Pesanan
-          </button>
-        )}
-        {o.status === 'Dikirim' && (
-          <div className="delivery-waiting-note">
-            🚚 <b>Pesanan Sedang Dikirim</b> · Menunggu {o.pemesan} konfirmasi diterima.
-          </div>
-        )}
-        {o.status === 'Selesai' && (
-          <div className="delivery-done-note">
-            ✅ <b>Pesanan Selesai</b> · {o.pemesan} telah konfirmasi pesanan diterima.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/** Komponen Utama: Dashboard Penjual */
+/**
+ * Halaman Utama: Dashboard Penjual (hanya bertanggung jawab untuk koordinasi state & data)
+ */
 export default function Dashboard() {
   const { user } = useAuth();
   const { orders, loading: ordersLoading, reload: reloadOrders } = useOrders();

@@ -1,20 +1,43 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
- * Custom hook untuk polling data dengan interval tertentu.
- * @param {Function} fn - Fungsi yang dipanggil saat polling (harus stabil/tidak berubah)
- * @param {number} intervalMs - Interval polling dalam ms (default 5000)
- * @param {boolean} enabled - Aktifkan/nonaktifkan polling (default true)
+ * Custom hook untuk polling data secara berkala dengan penanganan cleanup yang aman saat unmount.
+ * Mencegah memory leak dan eksekusi callback async setelah komponen dilepas.
+ * @param {Function} fn - Callback yang dijalankan setiap interval
+ * @param {number} intervalMs - Interval dalam milidetik (default 5000)
+ * @param {boolean} enabled - Apakah polling aktif (default true)
  */
 export function usePolling(fn, intervalMs = 5000, enabled = true) {
   const fnRef = useRef(fn);
-  fnRef.current = fn; // selalu pakai versi terbaru tanpa perlu re-subscribe
+  fnRef.current = fn;
 
   useEffect(() => {
-    if (!enabled) return;
-    // Panggil sekali langsung
-    fnRef.current();
-    const t = setInterval(() => fnRef.current(), intervalMs);
-    return () => clearInterval(t);
+    if (!enabled) return undefined;
+    let isMounted = true;
+
+    const executeSafe = async () => {
+      if (!isMounted) return;
+      try {
+        await fnRef.current();
+      } catch (e) {
+        // Mengabaikan error callback jika komponen sudah dilepas
+      }
+    };
+
+    // Jalankan segera sekali di awal
+    executeSafe();
+
+    // Atur interval
+    const timerId = setInterval(() => {
+      if (isMounted) {
+        executeSafe();
+      }
+    }, intervalMs);
+
+    // Cleanup menyeluruh saat unmount atau parameter berubah
+    return () => {
+      isMounted = false;
+      clearInterval(timerId);
+    };
   }, [intervalMs, enabled]);
 }

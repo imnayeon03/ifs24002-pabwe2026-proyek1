@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { rupiah } from '../api';
 
 /**
@@ -69,3 +70,29 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
     </div>
   );
 }
+
+PesananCard.propTypes = {
+  order: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    kios_nama: PropTypes.string,
+    nomor_antrean: PropTypes.number.isRequired,
+    jam_ambil: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
+    status_pembayaran: PropTypes.string.isRequired,
+    metode_pembayaran: PropTypes.string,
+    total: PropTypes.number.isRequired,
+    created_at: PropTypes.string,
+    waktu_kirim: PropTypes.string,
+    waktu_selesai: PropTypes.string,
+    items: PropTypes.arrayOf(
+      PropTypes.shape({
+        menu_id: PropTypes.number.isRequired,
+        nama: PropTypes.string.isRequired,
+        harga: PropTypes.number.isRequired,
+        jumlah: PropTypes.number.isRequired,
+      })
+    ),
+  }).isRequired,
+  onBayar: PropTypes.func,
+  onKonfirmasiTerima: PropTypes.func,
+};

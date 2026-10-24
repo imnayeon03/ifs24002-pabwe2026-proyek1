@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 export default function NotifikasiDropdown({ isOpen, onClose, notifications, onMarkAllRead, onMarkRead }) {
   if (!isOpen) return null;
 
@@ -13,7 +15,7 @@ export default function NotifikasiDropdown({ isOpen, onClose, notifications, onM
   };
 
   return (
-    <div className="notif-dropdown">
+    <div className="notif-dropdown" role="region" aria-label="Daftar Notifikasi">
       <div className="notif-header">
         <div>
           <b>Notifikasi</b>
@@ -21,9 +23,9 @@ export default function NotifikasiDropdown({ isOpen, onClose, notifications, onM
         </div>
         <div className="notif-actions">
           {unreadCount > 0 && (
-            <button className="btn-link" onClick={onMarkAllRead}>Tandai semua dibaca</button>
+            <button type="button" className="btn-link" onClick={onMarkAllRead}>Tandai semua dibaca</button>
           )}
-          <button className="btn-icon" onClick={onClose}>✕</button>
+          <button type="button" className="btn-icon" onClick={onClose} aria-label="Tutup notifikasi">✕</button>
         </div>
       </div>
 
@@ -51,3 +53,20 @@ export default function NotifikasiDropdown({ isOpen, onClose, notifications, onM
     </div>
   );
 }
+
+NotifikasiDropdown.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  notifications: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      judul: PropTypes.string.isRequired,
+      pesan: PropTypes.string.isRequired,
+      tipe: PropTypes.string,
+      dibaca: PropTypes.number,
+      created_at: PropTypes.string,
+    })
+  ).isRequired,
+  onMarkAllRead: PropTypes.func.isRequired,
+  onMarkRead: PropTypes.func.isRequired,
+};

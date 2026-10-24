@@ -1,7 +1,18 @@
+import PropTypes from 'prop-types';
+
 /**
  * Reusable modal konfirmasi untuk menggantikan window.confirm() bawaan browser.
  */
-export default function ConfirmModal({ isOpen, title = 'Konfirmasi', message, onConfirm, onCancel, confirmText = 'Ya, Lanjutkan', cancelText = 'Batal', isDanger = false }) {
+export default function ConfirmModal({
+  isOpen,
+  title = 'Konfirmasi',
+  message,
+  onConfirm,
+  onCancel,
+  confirmText = 'Ya, Lanjutkan',
+  cancelText = 'Batal',
+  isDanger = false,
+}) {
   if (!isOpen) return null;
 
   return (
@@ -29,3 +40,14 @@ export default function ConfirmModal({ isOpen, title = 'Konfirmasi', message, on
     </div>
   );
 }
+
+ConfirmModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  title: PropTypes.string,
+  message: PropTypes.string.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  confirmText: PropTypes.string,
+  cancelText: PropTypes.string,
+  isDanger: PropTypes.bool,
+};

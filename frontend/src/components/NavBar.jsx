@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import NotifikasiDropdown from './NotifikasiDropdown.jsx';
 
@@ -67,3 +68,26 @@ export default function NavBar({
     </header>
   );
 }
+
+NavBar.propTypes = {
+  user: PropTypes.shape({
+    id: PropTypes.number,
+    nama: PropTypes.string,
+    email: PropTypes.string,
+    role: PropTypes.string,
+  }),
+  onLogout: PropTypes.func.isRequired,
+  unreadCount: PropTypes.number.isRequired,
+  showNotif: PropTypes.bool.isRequired,
+  setShowNotif: PropTypes.func.isRequired,
+  notifications: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      judul: PropTypes.string.isRequired,
+      pesan: PropTypes.string.isRequired,
+      dibaca: PropTypes.number,
+    })
+  ).isRequired,
+  onMarkRead: PropTypes.func.isRequired,
+  onMarkAllRead: PropTypes.func.isRequired,
+};

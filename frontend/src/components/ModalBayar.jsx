@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { rupiah } from '../api';
 
 /**
@@ -123,3 +124,12 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
     </div>
   );
 }
+
+ModalBayar.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  total: PropTypes.number.isRequired,
+  orderNo: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  onConfirm: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+};

@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 /**
  * Komponen loading spinner yang accessible.
  */
@@ -9,3 +11,7 @@ export default function LoadingSpinner({ text = 'Memuat...' }) {
     </div>
   );
 }
+
+LoadingSpinner.propTypes = {
+  text: PropTypes.string,
+};
