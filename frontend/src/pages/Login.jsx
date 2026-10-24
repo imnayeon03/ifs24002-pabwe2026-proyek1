@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api, { errMsg } from '../api';
 import { useAuth } from '../auth.jsx';
 import { useForm, validators } from '../hooks/useForm.js';
 
-/** Validator gabungan untuk field username/email login */
 const loginValidators = {
-  username: (v) => (!v?.trim() ? 'Username atau email wajib diisi' : null),
+  username: validators.required('Username atau email'),
   password: validators.minLength(6),
 };
 
-/** Validator untuk form registrasi */
 const registerValidators = {
   nama: validators.required('Nama'),
   username: validators.email,
@@ -20,40 +19,34 @@ const registerValidators = {
 export default function Login() {
   const loc = useLocation();
   const [mode, setMode] = useState(loc.pathname.includes('register') ? 'register' : 'login');
-  const [submitErr, setSubmitErr] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const nav = useNavigate();
 
   const activeValidators = mode === 'login' ? loginValidators : registerValidators;
-  const { values: f, errors, set, validate, reset, setValues } = useForm(
+  const { values: f, errors, set: setField, validate, reset, setValues } = useForm(
     { username: '', password: '', nama: '' },
     activeValidators
   );
 
-  // Sync mode dengan URL path
   useEffect(() => {
     const newMode = loc.pathname.includes('register') ? 'register' : 'login';
     if (newMode !== mode) {
       setMode(newMode);
       reset();
-      setSubmitErr('');
     }
   }, [loc.pathname]); // eslint-disable-line
 
-  // Sinkronkan username & email
   const handleUsernameChange = (e) => {
     const val = e.target.value;
     setValues((prev) => ({ ...prev, username: val, email: val }));
-    if (errors.username) {
-      // reset error saat user mengetik
-    }
   };
 
-  async function submit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setSubmitErr('');
     if (!validate()) return;
 
+    setLoading(true);
     try {
       const payload = {
         email: f.username,
@@ -63,14 +56,17 @@ export default function Login() {
       };
       const { data } = await api.post(mode === 'login' ? '/auth/login' : '/auth/register', payload);
       login(data.token, data.user);
+      toast.success(mode === 'login' ? `Selamat datang, ${data.user.nama}!` : 'Pendaftaran berhasil!');
       nav(data.user.role === 'penjual' ? '/dashboard' : '/');
     } catch (e2) {
-      setSubmitErr(errMsg(e2));
+      toast.error(errMsg(e2));
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <form id="form-login" className="card narrow" onSubmit={submit} noValidate>
+    <form id="form-login" className="card narrow" onSubmit={handleSubmit} noValidate>
       <h2>{mode === 'login' ? 'Masuk' : 'Daftar Mahasiswa'}</h2>
 
       {mode === 'register' && (
@@ -80,7 +76,7 @@ export default function Login() {
               id="nama"
               name="nama"
               value={f.nama}
-              onChange={set('nama')}
+              onChange={setField('nama')}
               required
               aria-invalid={!!errors.nama}
             />
@@ -114,7 +110,7 @@ export default function Login() {
             type="password"
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             value={f.password}
-            onChange={set('password')}
+            onChange={setField('password')}
             required
             minLength={6}
             aria-invalid={!!errors.password}
@@ -123,10 +119,8 @@ export default function Login() {
         {errors.password && <p className="error small">{errors.password}</p>}
       </div>
 
-      {submitErr && <p className="error" id="error-message">{submitErr}</p>}
-
-      <button id="btn-submit" name="btn-submit" className="primary" type="submit">
-        {mode === 'login' ? 'Masuk' : 'Daftar'}
+      <button id="btn-submit" name="btn-submit" className="primary" type="submit" disabled={loading}>
+        {loading ? 'Memproses...' : mode === 'login' ? 'Masuk' : 'Daftar'}
       </button>
 
       <p className="muted">
@@ -138,7 +132,6 @@ export default function Login() {
             e.preventDefault();
             setMode(mode === 'login' ? 'register' : 'login');
             reset();
-            setSubmitErr('');
           }}
         >
           {mode === 'login' ? 'Daftar' : 'Masuk'}

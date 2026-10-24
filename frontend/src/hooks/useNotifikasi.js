@@ -1,14 +1,13 @@
 import { useCallback, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import api from '../api';
 import { usePolling } from './usePolling';
 
 /**
- * Custom hook untuk mengelola notifikasi + toast alert.
- * Menggantikan logika polling notifikasi yang sebelumnya ada di App.jsx.
+ * Custom hook untuk mengelola notifikasi + react-hot-toast alert.
  */
 export function useNotifikasi(user) {
   const [notifications, setNotifications] = useState([]);
-  const [toast, setToast] = useState(null);
   const lastIdRef = useRef(null);
 
   const fetchNotif = useCallback(() => {
@@ -20,8 +19,11 @@ export function useNotifikasi(user) {
         if (data.length > 0) {
           const newest = data[0];
           if (lastIdRef.current !== null && newest.id > lastIdRef.current && !newest.dibaca) {
-            setToast({ judul: newest.judul, pesan: newest.pesan, tipe: newest.tipe });
-            setTimeout(() => setToast(null), 5000);
+            const icon =
+              newest.tipe === 'pembayaran' ? '💳' :
+              newest.tipe === 'pengiriman' ? '🚚' :
+              newest.tipe === 'penerimaan' ? '✅' : '🔔';
+            toast(`${newest.judul}: ${newest.pesan}`, { icon, duration: 5000 });
           }
           lastIdRef.current = newest.id;
         }
@@ -47,5 +49,5 @@ export function useNotifikasi(user) {
 
   const unreadCount = notifications.filter((n) => !n.dibaca).length;
 
-  return { notifications, unreadCount, toast, setToast, markRead, markAllRead };
+  return { notifications, unreadCount, markRead, markAllRead };
 }

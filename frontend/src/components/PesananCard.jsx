@@ -1,18 +1,11 @@
 import { rupiah } from '../api';
-import ModalBayar from './ModalBayar.jsx';
-import { useState } from 'react';
 
 /**
- * PesananCard — komponen reusable untuk menampilkan satu kartu pesanan.
- * Dipakai di Riwayat.jsx (mahasiswa) dengan aksi bayar & konfirmasi terima.
+ * Komponen presentasional murni untuk menampilkan satu kartu pesanan.
+ * Tidak menyimpan state bisnis atau memanggil API secara langsung.
  */
 export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
-  const [showModalBayar, setShowModalBayar] = useState(false);
-
-  const handleBayar = async (metode) => {
-    await onBayar(o, metode);
-    setShowModalBayar(false);
-  };
+  const isPaid = o.status_pembayaran === 'Sudah Dibayar';
 
   return (
     <div className="card" key={o.id}>
@@ -21,8 +14,8 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
           <b>{o.kios_nama} · Antrean #{o.nomor_antrean}</b>
           <div className="order-badges">
             <span className={`status ${o.status}`}>{o.status}</span>
-            <span className={`badge-payment ${o.status_pembayaran === 'Sudah Dibayar' ? 'paid' : 'unpaid'}`}>
-              {o.status_pembayaran === 'Sudah Dibayar'
+            <span className={`badge-payment ${isPaid ? 'paid' : 'unpaid'}`}>
+              {isPaid
                 ? `✅ Lunas (${o.metode_pembayaran || 'QRIS'})`
                 : '⏳ Belum Dibayar'}
             </span>
@@ -43,17 +36,17 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
         ))}
       </ul>
 
-      {/* Belum dibayar → tombol bayar */}
-      {o.status_pembayaran !== 'Sudah Dibayar' && (
+      {/* Belum dibayar → aksi bayar */}
+      {!isPaid && (
         <div className="action-box payment-action">
           <span>Pesanan ini belum dibayar. Silakan lakukan pembayaran agar penjual segera memproses pesanan Anda.</span>
-          <button type="button" className="primary" onClick={() => setShowModalBayar(true)}>
+          <button type="button" className="primary" onClick={() => onBayar && onBayar(o)}>
             💳 Bayar Sekarang
           </button>
         </div>
       )}
 
-      {/* Sedang dikirim → konfirmasi terima */}
+      {/* Sedang dikirim → aksi konfirmasi terima */}
       {o.status === 'Dikirim' && (
         <div className="action-box delivery-action">
           <div className="delivery-info">
@@ -62,7 +55,7 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
               Silakan periksa makanan/minuman yang Anda terima. Jika sudah sesuai, klik tombol konfirmasi.
             </p>
           </div>
-          <button type="button" className="btn-terima" onClick={() => onKonfirmasiTerima(o)}>
+          <button type="button" className="btn-terima" onClick={() => onKonfirmasiTerima && onKonfirmasiTerima(o)}>
             ✅ Konfirmasi Sudah Menerima Pesanan
           </button>
         </div>
@@ -72,16 +65,6 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
         <div className="status-finished-note">
           ✅ Pesanan telah selesai dan Anda konfirmasi diterima.
         </div>
-      )}
-
-      {showModalBayar && (
-        <ModalBayar
-          isOpen={showModalBayar}
-          onClose={() => setShowModalBayar(false)}
-          total={o.total}
-          orderNo={o.nomor_antrean}
-          onConfirm={handleBayar}
-        />
       )}
     </div>
   );

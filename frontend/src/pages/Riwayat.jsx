@@ -1,59 +1,78 @@
 import { useState } from 'react';
-import { errMsg } from '../api';
-import api from '../api';
 import { useOrders } from '../hooks/useOrders.js';
+import { useOrderActions } from '../hooks/useOrderActions.js';
 import PesananCard from '../components/PesananCard.jsx';
+import ModalBayar from '../components/ModalBayar.jsx';
+import ConfirmModal from '../components/ConfirmModal.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 export default function Riwayat() {
   const { orders, loading, error, reload } = useOrders();
-  const [msg, setMsg] = useState('');
-  const [err, setErr] = useState(error);
+  const { bayarOrder, konfirmasiTerima, loadingAction } = useOrderActions(reload);
 
-  const showMsg = (text) => { setMsg(text); setTimeout(() => setMsg(''), 6000); };
+  const [selectedPayOrder, setSelectedPayOrder] = useState(null);
+  const [confirmOrder, setConfirmOrder] = useState(null);
 
-  const handleBayar = async (order, metode) => {
+  const handleBayarConfirm = async (metode) => {
+    if (!selectedPayOrder) return;
     try {
-      await api.post(`/orders/${order.id}/bayar`, { metode_pembayaran: metode });
-      showMsg(`Pembayaran pesanan #${order.nomor_antrean} berhasil! Penjual telah menerima notifikasi.`);
-      reload();
-    } catch (e) {
-      setErr(errMsg(e));
-      throw e; // agar ModalBayar bisa handle error juga
+      await bayarOrder(selectedPayOrder.id, selectedPayOrder.nomor_antrean, metode);
+      setSelectedPayOrder(null);
+    } catch {
+      // error sudah ditampilkan via toast di useOrderActions
     }
   };
 
-  const handleKonfirmasiTerima = async (order) => {
-    if (!confirm(`Konfirmasi bahwa Anda telah menerima pesanan #${order.nomor_antrean} dari ${order.kios_nama}?`)) return;
-    setErr('');
-    try {
-      await api.post(`/orders/${order.id}/konfirmasi-terima`);
-      showMsg(`Pesanan #${order.nomor_antrean} berhasil dikonfirmasi diterima. Terima kasih!`);
-      reload();
-    } catch (e) {
-      setErr(errMsg(e));
-    }
+  const handleKonfirmasiTerimaClick = (order) => {
+    setConfirmOrder(order);
+  };
+
+  const executeKonfirmasiTerima = async () => {
+    if (!confirmOrder) return;
+    await konfirmasiTerima(confirmOrder.id, confirmOrder.nomor_antrean);
+    setConfirmOrder(null);
   };
 
   return (
     <>
       <h1>Pesanan Saya</h1>
-      {msg && <div className="alert-success">{msg}</div>}
-      {(err || error) && <div className="error">{err || error}</div>}
+      {error && <div className="error">{error}</div>}
 
-      {loading
-        ? <LoadingSpinner text="Memuat pesanan..." />
-        : !orders.length
-          ? <p className="muted">Belum ada pesanan.</p>
-          : orders.map((o) => (
-              <PesananCard
-                key={o.id}
-                order={o}
-                onBayar={handleBayar}
-                onKonfirmasiTerima={handleKonfirmasiTerima}
-              />
-            ))
-      }
+      {loading ? (
+        <LoadingSpinner text="Memuat daftar pesanan..." />
+      ) : !orders.length ? (
+        <p className="muted">Belum ada pesanan.</p>
+      ) : (
+        orders.map((o) => (
+          <PesananCard
+            key={o.id}
+            order={o}
+            onBayar={() => setSelectedPayOrder(o)}
+            onKonfirmasiTerima={() => handleKonfirmasiTerimaClick(o)}
+          />
+        ))
+      )}
+
+      {selectedPayOrder && (
+        <ModalBayar
+          isOpen={!!selectedPayOrder}
+          onClose={() => setSelectedPayOrder(null)}
+          total={selectedPayOrder.total}
+          orderNo={selectedPayOrder.nomor_antrean}
+          onConfirm={handleBayarConfirm}
+          loading={loadingAction}
+        />
+      )}
+
+      <ConfirmModal
+        isOpen={!!confirmOrder}
+        title="Konfirmasi Penerimaan Pesanan"
+        message={confirmOrder ? `Konfirmasi bahwa Anda telah menerima pesanan #${confirmOrder.nomor_antrean} dari ${confirmOrder.kios_nama}?` : ''}
+        confirmText="Ya, Sudah Diterima"
+        cancelText="Batal"
+        onConfirm={executeKonfirmasiTerima}
+        onCancel={() => setConfirmOrder(null)}
+      />
     </>
   );
 }

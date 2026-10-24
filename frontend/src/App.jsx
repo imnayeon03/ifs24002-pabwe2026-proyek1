@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { useAuth } from './auth.jsx';
 import NavBar from './components/NavBar.jsx';
-import ToastNotification from './components/ToastNotification.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { useNotifikasi } from './hooks/useNotifikasi.js';
 import Login from './pages/Login.jsx';
@@ -18,7 +18,7 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [showNotif, setShowNotif] = useState(false);
 
-  const { notifications, unreadCount, toast, setToast, markRead, markAllRead } = useNotifikasi(user);
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifikasi(user);
 
   const add = (m) => setCart((c) => {
     const f = c.find((x) => x.menu.id === m.id);
@@ -34,6 +34,8 @@ export default function App() {
 
   return (
     <>
+      <Toaster position="top-right" toastOptions={{ duration: 4500 }} />
+
       <NavBar
         user={user}
         onLogout={logout}
@@ -44,8 +46,6 @@ export default function App() {
         onMarkRead={markRead}
         onMarkAllRead={markAllRead}
       />
-
-      <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
       <main>
         <ErrorBoundary>

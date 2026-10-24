@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
-import api, { errMsg, rupiah } from '../api';
+import { useState } from 'react';
+import { rupiah } from '../api';
 import { useAuth } from '../auth.jsx';
 import { useOrders } from '../hooks/useOrders.js';
-import { usePolling } from '../hooks/usePolling.js';
+import { useMenu } from '../hooks/useMenu.js';
+import { useOrderActions } from '../hooks/useOrderActions.js';
 import { useForm, validators } from '../hooks/useForm.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
+import ConfirmModal from '../components/ConfirmModal.jsx';
 
 const STATUS = ['Diterima', 'Dimasak', 'Siap', 'Dikirim', 'Selesai'];
 const EMPTY_MENU = { nama: '', harga: '', kategori: 'Makanan', stok: '' };
@@ -15,8 +17,8 @@ const menuValidators = {
   stok: validators.nonNegativeNumber('Stok'),
 };
 
-/** Sub-komponen: Form tambah/edit menu */
-function MenuForm({ editId, form, errors, onSet, onSubmit, onBatal }) {
+/** Sub-komponen Presentasional: Form kelola menu */
+function MenuForm({ editId, form, errors, onSet, onSubmit, onBatal, loading }) {
   return (
     <form className="card filters" onSubmit={onSubmit} noValidate>
       <div>
@@ -58,16 +60,18 @@ function MenuForm({ editId, form, errors, onSet, onSubmit, onBatal }) {
         />
         {errors.stok && <p className="error small">{errors.stok}</p>}
       </div>
-      <button className="primary" type="submit">{editId ? 'Simpan Perubahan' : 'Tambah Menu'}</button>
+      <button className="primary" type="submit" disabled={loading}>
+        {loading ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Tambah Menu'}
+      </button>
       {editId && (
-        <button type="button" onClick={onBatal}>Batal</button>
+        <button type="button" onClick={onBatal} disabled={loading}>Batal</button>
       )}
     </form>
   );
 }
 
-/** Sub-komponen: Tabel daftar menu kios */
-function MenuTable({ menu, onEdit, onHapus }) {
+/** Sub-komponen Presentasional: Tabel menu */
+function MenuTable({ menu, onEdit, onHapusClick }) {
   if (!menu.length) return <p className="muted">Belum ada menu.</p>;
   return (
     <table>
@@ -85,7 +89,7 @@ function MenuTable({ menu, onEdit, onHapus }) {
             <td>{m.stok}</td>
             <td>
               <button onClick={() => onEdit(m)}>Ubah</button>
-              <button onClick={() => onHapus(m.id)}>Hapus</button>
+              <button onClick={() => onHapusClick(m)}>Hapus</button>
             </td>
           </tr>
         ))}
@@ -94,9 +98,10 @@ function MenuTable({ menu, onEdit, onHapus }) {
   );
 }
 
-/** Sub-komponen: Kartu pesanan masuk (penjual view) */
-function PesananMasukCard({ order: o, onUbahStatus, onKonfirmasiKirim }) {
+/** Sub-komponen Presentasional: Kartu pesanan masuk */
+function PesananMasukCard({ order: o, onUbahStatus, onKonfirmasiKirimClick }) {
   const isPaid = o.status_pembayaran === 'Sudah Dibayar';
+
   return (
     <div className="card">
       <div className="row">
@@ -141,7 +146,7 @@ function PesananMasukCard({ order: o, onUbahStatus, onKonfirmasiKirim }) {
         </div>
 
         {o.status !== 'Dikirim' && o.status !== 'Selesai' && (
-          <button type="button" className="btn-kirim" onClick={() => onKonfirmasiKirim(o)}>
+          <button type="button" className="btn-kirim" onClick={() => onKonfirmasiKirimClick(o)}>
             🚚 Konfirmasi Sudah Mengirim Pesanan
           </button>
         )}
@@ -160,80 +165,47 @@ function PesananMasukCard({ order: o, onUbahStatus, onKonfirmasiKirim }) {
   );
 }
 
-/** Halaman utama Dashboard Penjual */
+/** Komponen Utama: Dashboard Penjual */
 export default function Dashboard() {
   const { user } = useAuth();
-  const { orders, loading: ordersLoading, reload } = useOrders();
+  const { orders, loading: ordersLoading, reload: reloadOrders } = useOrders();
+  const { menu, loading: menuLoading, saveMenu, deleteMenu } = useMenu(user.kios_id);
+  const { ubahStatus, konfirmasiKirim } = useOrderActions(reloadOrders);
 
-  const [menu, setMenu] = useState([]);
   const [editId, setEditId] = useState(null);
-  const [err, setErr] = useState('');
-  const [msg, setMsg] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [kirimTarget, setKirimTarget] = useState(null);
 
   const { values: form, errors: formErrors, set: setField, validate, reset, setValues } = useForm(
     EMPTY_MENU,
     menuValidators
   );
 
-  const loadMenu = useCallback(() => {
-    api.get('/menu', { params: { kios_id: user.kios_id } })
-      .then((r) => setMenu(r.data))
-      .catch(() => {});
-  }, [user.kios_id]);
-
-  usePolling(loadMenu);
-
-  const showMsg = (text) => { setMsg(text); setTimeout(() => setMsg(''), 6000); };
-
-  async function simpan(e) {
+  async function handleSimpanMenu(e) {
     e.preventDefault();
-    setErr('');
     if (!validate()) return;
-    const body = { ...form, harga: Number(form.harga), stok: Number(form.stok) };
-    try {
-      if (editId) await api.put(`/menu/${editId}`, { ...body, tersedia: true });
-      else await api.post('/menu', body);
+    const ok = await saveMenu(form, editId);
+    if (ok) {
       reset();
       setEditId(null);
-      loadMenu();
-    } catch (e2) {
-      setErr(errMsg(e2));
     }
   }
 
-  const hapus = async (id) => {
-    if (!confirm('Hapus menu ini?')) return;
-    try {
-      await api.delete(`/menu/${id}`);
-      loadMenu();
-    } catch (e) {
-      setErr(errMsg(e));
-    }
-  };
-
-  const ubahStatus = async (id, status) => {
-    try {
-      await api.patch(`/orders/${id}/status`, { status });
-      reload();
-    } catch (e) {
-      setErr(errMsg(e));
-    }
-  };
-
-  const konfirmasiKirim = async (order) => {
-    if (!confirm(`Konfirmasi pesanan #${order.nomor_antrean} untuk ${order.pemesan} sudah dikirim?`)) return;
-    try {
-      await api.post(`/orders/${order.id}/kirim`);
-      showMsg(`Pesanan #${order.nomor_antrean} berhasil ditandai sudah dikirim.`);
-      reload();
-    } catch (e) {
-      setErr(errMsg(e));
-    }
-  };
-
-  const mulaiEdit = (m) => {
+  const handleMulaiEdit = (m) => {
     setEditId(m.id);
     setValues({ nama: m.nama, harga: String(m.harga), kategori: m.kategori, stok: String(m.stok) });
+  };
+
+  const handleConfirmHapus = async () => {
+    if (!deleteTarget) return;
+    await deleteMenu(deleteTarget.id, deleteTarget.nama);
+    setDeleteTarget(null);
+  };
+
+  const handleConfirmKirim = async () => {
+    if (!kirimTarget) return;
+    await konfirmasiKirim(kirimTarget.id, kirimTarget.nomor_antrean);
+    setKirimTarget(null);
   };
 
   const paidOrdersCount = orders.filter((o) => o.status_pembayaran === 'Sudah Dibayar' && o.status !== 'Selesai').length;
@@ -242,9 +214,6 @@ export default function Dashboard() {
     <>
       <h1>Dashboard Penjual</h1>
 
-      {msg && <div className="alert-success">{msg}</div>}
-      {err && <div className="error">{err}</div>}
-
       {paidOrdersCount > 0 && (
         <div className="banner-payment-info">
           💳 <b>Notifikasi Pembayaran:</b> Terdapat {paidOrdersCount} pesanan aktif yang pembayarannya sudah lunas.
@@ -252,19 +221,20 @@ export default function Dashboard() {
       )}
 
       <h2>Pesanan Masuk</h2>
-      {ordersLoading
-        ? <LoadingSpinner text="Memuat pesanan..." />
-        : !orders.length
-          ? <p className="muted">Belum ada pesanan.</p>
-          : orders.map((o) => (
-              <PesananMasukCard
-                key={o.id}
-                order={o}
-                onUbahStatus={ubahStatus}
-                onKonfirmasiKirim={konfirmasiKirim}
-              />
-            ))
-      }
+      {ordersLoading ? (
+        <LoadingSpinner text="Memuat pesanan masuk..." />
+      ) : !orders.length ? (
+        <p className="muted">Belum ada pesanan.</p>
+      ) : (
+        orders.map((o) => (
+          <PesananMasukCard
+            key={o.id}
+            order={o}
+            onUbahStatus={ubahStatus}
+            onKonfirmasiKirimClick={setKirimTarget}
+          />
+        ))
+      )}
 
       <h2>Kelola Menu</h2>
       <MenuForm
@@ -272,11 +242,39 @@ export default function Dashboard() {
         form={form}
         errors={formErrors}
         onSet={setField}
-        onSubmit={simpan}
+        onSubmit={handleSimpanMenu}
         onBatal={() => { setEditId(null); reset(); }}
+        loading={menuLoading}
       />
-      {err && <p className="error">{err}</p>}
-      <MenuTable menu={menu} onEdit={mulaiEdit} onHapus={hapus} />
+
+      <MenuTable
+        menu={menu}
+        onEdit={handleMulaiEdit}
+        onHapusClick={setDeleteTarget}
+      />
+
+      {/* Modal Konfirmasi Hapus Menu */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Hapus Menu"
+        message={deleteTarget ? `Apakah Anda yakin ingin menghapus menu "${deleteTarget.nama}"?` : ''}
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        isDanger={true}
+        onConfirm={handleConfirmHapus}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
+      {/* Modal Konfirmasi Kirim Pesanan */}
+      <ConfirmModal
+        isOpen={!!kirimTarget}
+        title="Konfirmasi Pengiriman Pesanan"
+        message={kirimTarget ? `Konfirmasi bahwa pesanan #${kirimTarget.nomor_antrean} untuk ${kirimTarget.pemesan} sudah Anda kirim?` : ''}
+        confirmText="Ya, Sudah Dikirim"
+        cancelText="Batal"
+        onConfirm={handleConfirmKirim}
+        onCancel={() => setKirimTarget(null)}
+      />
     </>
   );
 }
