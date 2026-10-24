@@ -104,5 +104,39 @@ describe('api module', () => {
       const error = { response: { status: 500 } };
       await expect(errHandler(error)).rejects.toEqual(error);
     });
+
+    it('response interceptor tetap menganggap sesi habis jika 401 tanpa config.url', async () => {
+      vi.useFakeTimers();
+      const redirectSpy = vi.spyOn(nav, 'hardRedirect').mockImplementation(() => {});
+      localStorage.setItem('token', 'expired-token');
+
+      const errHandler = api.interceptors.response.handlers[0].rejected;
+      const error = { response: { status: 401 } };
+
+      await expect(errHandler(error)).rejects.toEqual(error);
+      expect(localStorage.getItem('token')).toBeNull();
+
+      vi.advanceTimersByTime(1000);
+      expect(redirectSpy).toHaveBeenCalledWith('/auth/login');
+      vi.useRealTimers();
+    });
+
+    it('response interceptor tidak redirect jika sudah berada di halaman login', async () => {
+      vi.useFakeTimers();
+      const redirectSpy = vi.spyOn(nav, 'hardRedirect').mockImplementation(() => {});
+      globalThis.history.pushState({}, '', '/auth/login');
+
+      const errHandler = api.interceptors.response.handlers[0].rejected;
+      const error = { config: { url: '/orders' }, response: { status: 401 } };
+
+      await expect(errHandler(error)).rejects.toEqual(error);
+      expect(toast.error).toHaveBeenCalledTimes(1);
+
+      vi.advanceTimersByTime(1000);
+      expect(redirectSpy).not.toHaveBeenCalled();
+
+      globalThis.history.pushState({}, '', '/');
+      vi.useRealTimers();
+    });
   });
 });

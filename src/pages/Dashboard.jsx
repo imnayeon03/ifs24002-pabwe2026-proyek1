@@ -51,14 +51,13 @@ export default function Dashboard() {
     setValues({ nama: m.nama, harga: String(m.harga), kategori: m.kategori, stok: String(m.stok) });
   };
 
+  // ConfirmModal hanya terbuka (dan bisa dikonfirmasi) saat target sudah terisi.
   const handleConfirmHapus = async () => {
-    if (!deleteTarget) return;
     await deleteMenu(deleteTarget.id, deleteTarget.nama);
     setDeleteTarget(null);
   };
 
   const handleConfirmKirim = async () => {
-    if (!kirimTarget) return;
     await konfirmasiKirim(kirimTarget.id, kirimTarget.nomor_antrean);
     setKirimTarget(null);
   };

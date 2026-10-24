@@ -13,8 +13,8 @@ export default function Riwayat() {
   const [selectedPayOrder, setSelectedPayOrder] = useState(null);
   const [confirmOrder, setConfirmOrder] = useState(null);
 
+  // ModalBayar hanya dirender (dan bisa dikonfirmasi) saat selectedPayOrder terisi.
   const handleBayarConfirm = async (metode) => {
-    if (!selectedPayOrder) return;
     try {
       await bayarOrder(selectedPayOrder.id, selectedPayOrder.nomor_antrean, metode);
       setSelectedPayOrder(null);
@@ -28,7 +28,6 @@ export default function Riwayat() {
   };
 
   const executeKonfirmasiTerima = async () => {
-    if (!confirmOrder) return;
     await konfirmasiTerima(confirmOrder.id, confirmOrder.nomor_antrean);
     setConfirmOrder(null);
   };

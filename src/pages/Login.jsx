@@ -57,7 +57,7 @@ export default function Login() {
         email: username,
         username,
         password,
-        ...(mode === 'register' && { nama: nama || username }),
+        ...(mode === 'register' && { nama }),
       };
       const { data } = await api.post(mode === 'login' ? '/auth/login' : '/auth/register', payload);
       login(data.token, data.user);

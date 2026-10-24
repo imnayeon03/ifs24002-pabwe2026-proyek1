@@ -76,3 +76,41 @@ describe('NavBar Component', () => {
     expect(onLogout).toHaveBeenCalled();
   });
 });
+
+describe('NavBar - dropdown notifikasi', () => {
+  const props = {
+    onLogout: vi.fn(),
+    unreadCount: 0,
+    notifications: [],
+    onMarkRead: vi.fn(),
+    onMarkAllRead: vi.fn(),
+  };
+  const user = { id: 1, nama: 'Budi', role: 'mahasiswa' };
+
+  it('tombol lonceng membalik status dropdown lewat updater function', () => {
+    const setShowNotif = vi.fn();
+    render(
+      <BrowserRouter>
+        <NavBar {...props} user={user} showNotif={false} setShowNotif={setShowNotif} />
+      </BrowserRouter>
+    );
+
+    fireEvent.click(screen.getByTitle('Notifikasi'));
+
+    const updater = setShowNotif.mock.calls[0][0];
+    expect(updater(false)).toBe(true);
+    expect(updater(true)).toBe(false);
+  });
+
+  it('tombol tutup di dalam dropdown menutup dropdown', () => {
+    const setShowNotif = vi.fn();
+    render(
+      <BrowserRouter>
+        <NavBar {...props} user={user} showNotif={true} setShowNotif={setShowNotif} />
+      </BrowserRouter>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Tutup notifikasi' }));
+    expect(setShowNotif).toHaveBeenCalledWith(false);
+  });
+});

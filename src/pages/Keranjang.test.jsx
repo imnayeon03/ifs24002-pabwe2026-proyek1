@@ -154,3 +154,44 @@ describe('Keranjang Component', () => {
     expect(metodeSelect.value).toBe('Tunai');
   });
 });
+
+describe('Keranjang Component - kasus tambahan', () => {
+  const cart = [
+    { menu: { id: 1, nama: 'Nasi Ayam', harga: 15000, stok: 5, kios_nama: 'Kios Bu Sari' }, jumlah: 1 },
+  ];
+
+  it('callback sukses checkout mengosongkan keranjang', () => {
+    useCheckout.mockReturnValue({ checkout: vi.fn(), loading: false });
+    const setCart = vi.fn();
+    render(<Keranjang cart={cart} setCart={setCart} />);
+
+    const onSuccess = useCheckout.mock.calls[0][0];
+    onSuccess();
+
+    expect(setCart).toHaveBeenCalledWith([]);
+  });
+
+  it('menampilkan status memproses dan menonaktifkan tombol saat loading', () => {
+    useCheckout.mockReturnValue({ checkout: vi.fn(), loading: true });
+    render(<Keranjang cart={cart} setCart={vi.fn()} />);
+
+    const tombolBayar = screen.getByRole('button', { name: 'Memproses...' });
+    expect(tombolBayar.disabled).toBe(true);
+    expect(screen.getByText('Pesan Dulu (Bayar Nanti)').disabled).toBe(true);
+  });
+
+  it('konfirmasi modal tidak memanggil checkout jika jam dikosongkan setelah modal terbuka', () => {
+    const checkout = vi.fn().mockResolvedValue({ id: 1 });
+    useCheckout.mockReturnValue({ checkout, loading: false });
+    render(<Keranjang cart={cart} setCart={vi.fn()} />);
+
+    fireEvent.click(screen.getByText(/Bayar & Buat Pesanan/i));
+    expect(screen.getByTestId('modal-bayar')).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText(/Jam Pengambilan/i), { target: { value: '' } });
+    fireEvent.click(screen.getByText('Konfirmasi Modal'));
+
+    expect(checkout).not.toHaveBeenCalled();
+    expect(screen.getByText('Jam pengambilan wajib diisi')).toBeTruthy();
+  });
+});

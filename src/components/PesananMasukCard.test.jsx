@@ -102,3 +102,30 @@ describe('PesananMasukCard Component', () => {
     expect(screen.queryByRole('button', { name: /Konfirmasi Sudah Mengirim Pesanan/i })).toBeNull();
   });
 });
+
+describe('PesananMasukCard - data opsional', () => {
+  const order = {
+    id: 11,
+    nomor_antrean: 4,
+    pemesan: 'Budi',
+    jam_ambil: '11:00',
+    status: 'Diterima',
+    status_pembayaran: 'Sudah Dibayar',
+    total: 10000,
+    created_at: '2026-10-24 10:00',
+  };
+
+  it('memakai QRIS sebagai metode default pada pesanan lunas tanpa metode', () => {
+    render(
+      <PesananMasukCard order={order} onUbahStatus={vi.fn()} onKonfirmasiKirimClick={vi.fn()} />
+    );
+    expect(screen.getByText(/Sudah Dibayar \(QRIS\)/)).toBeTruthy();
+  });
+
+  it('tidak menampilkan item jika items tidak ada', () => {
+    const { container } = render(
+      <PesananMasukCard order={order} onUbahStatus={vi.fn()} onKonfirmasiKirimClick={vi.fn()} />
+    );
+    expect(container.querySelectorAll('li')).toHaveLength(0);
+  });
+});

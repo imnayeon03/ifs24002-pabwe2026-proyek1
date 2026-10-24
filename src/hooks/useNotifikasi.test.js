@@ -113,3 +113,28 @@ describe('useNotifikasi Hook', () => {
     });
   });
 });
+
+describe('useNotifikasi Hook - banyak notifikasi', () => {
+  it('markRead hanya menandai notifikasi yang dipilih', async () => {
+    api.get.mockResolvedValueOnce({
+      data: [
+        { id: 2, judul: 'N2', pesan: 'P2', dibaca: 0 },
+        { id: 1, judul: 'N1', pesan: 'P1', dibaca: 0 },
+      ],
+    });
+    api.patch.mockResolvedValueOnce({ data: { message: 'ok' } });
+
+    const { result } = renderHook(() => useNotifikasi({ id: 1 }));
+    await waitFor(() => {
+      expect(result.current.unreadCount).toBe(2);
+    });
+
+    await act(async () => {
+      await result.current.markRead(2);
+    });
+
+    expect(result.current.unreadCount).toBe(1);
+    expect(result.current.notifications.find((n) => n.id === 2).dibaca).toBe(1);
+    expect(result.current.notifications.find((n) => n.id === 1).dibaca).toBe(0);
+  });
+});

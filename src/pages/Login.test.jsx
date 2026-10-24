@@ -145,3 +145,27 @@ describe('Login (mode daftar)', () => {
     expect(toast.success).toHaveBeenCalledWith('Pendaftaran berhasil!');
   });
 });
+
+describe('Login (mode daftar) - validasi form kosong', () => {
+  it('menampilkan error untuk nama, email, dan password sekaligus', () => {
+    renderLogin('/auth/register');
+    submit();
+
+    expect(screen.getByText('Nama wajib diisi')).toBeTruthy();
+    expect(screen.getByText('Format email tidak valid')).toBeTruthy();
+    expect(screen.getByText('Minimal 6 karakter')).toBeTruthy();
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it('menampilkan error password saja jika hanya password yang terlalu pendek', () => {
+    renderLogin('/auth/register');
+    type('Nama', 'Edwin');
+    type('Email', 'edwin@delfood.local');
+    type('Password', '123');
+    submit();
+
+    expect(screen.getByText('Minimal 6 karakter')).toBeTruthy();
+    expect(screen.queryByText('Nama wajib diisi')).toBeNull();
+    expect(api.post).not.toHaveBeenCalled();
+  });
+});

@@ -79,3 +79,20 @@ describe('ModalBayar Component', () => {
     expect(submitBtn.disabled).toBe(true);
   });
 });
+
+describe('ModalBayar - tanpa nomor pesanan', () => {
+  it('judul tidak menampilkan nomor jika orderNo kosong', () => {
+    render(
+      <ModalBayar
+        isOpen
+        onClose={vi.fn()}
+        total={10000}
+        onConfirm={vi.fn()}
+      />
+    );
+
+    const heading = screen.getByRole('heading', { level: 3 });
+    expect(heading.textContent.trim()).toBe('Pembayaran Pesanan');
+    expect(heading.textContent).not.toContain('#');
+  });
+});

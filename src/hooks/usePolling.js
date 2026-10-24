@@ -18,7 +18,6 @@ export function usePolling(fn, intervalMs = 5000, enabled = true) {
     let isMounted = true;
 
     const executeSafe = async () => {
-      if (!isMounted) return;
       try {
         await fnRef.current();
       } catch (err) {

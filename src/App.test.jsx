@@ -21,6 +21,7 @@ vi.mock('./pages/Katalog.jsx', () => ({
     <div>
       <span>Halaman Katalog</span>
       <button onClick={() => onAdd({ id: 1, stok: 2 })}>tambah</button>
+      <button onClick={() => onAdd({ id: 2, stok: 5 })}>tambah-2</button>
       <span data-testid="cart">{cart.map((x) => `${x.menu.id}x${x.jumlah}`).join(',')}</span>
     </div>
   ),
@@ -89,6 +90,16 @@ describe('App routing & guard', () => {
     expect(await screen.findByText('Halaman Dashboard')).toBeTruthy();
   });
 
+  it('mahasiswa bisa membuka riwayat (lazy load)', async () => {
+    renderApp('/riwayat', { user: mahasiswa });
+    expect(await screen.findByText('Halaman Riwayat')).toBeTruthy();
+  });
+
+  it('user yang login bisa membuka notifikasi (lazy load)', async () => {
+    renderApp('/notifikasi', { user: mahasiswa });
+    expect(await screen.findByText('Halaman Notifikasi')).toBeTruthy();
+  });
+
   it('user yang login bisa membuka profil', async () => {
     renderApp('/profil', { user: mahasiswa });
     expect(await screen.findByText('Halaman Profil')).toBeTruthy();
@@ -114,5 +125,20 @@ describe('App keranjang', () => {
     // stok = 2, jadi tidak boleh melebihi 2
     fireEvent.click(screen.getByText('tambah'));
     expect(cart()).toBe('1x2');
+  });
+});
+
+describe('App keranjang - banyak menu', () => {
+  it('menambah menu lain tanpa mengubah jumlah menu yang sudah ada', () => {
+    renderApp('/', { user: mahasiswa });
+    const cart = () => screen.getByTestId('cart').textContent;
+
+    fireEvent.click(screen.getByText('tambah'));
+    fireEvent.click(screen.getByText('tambah-2'));
+    expect(cart()).toBe('1x1,2x1');
+
+    // menu 1 ditambah lagi: menu 2 harus tetap utuh
+    fireEvent.click(screen.getByText('tambah'));
+    expect(cart()).toBe('1x2,2x1');
   });
 });

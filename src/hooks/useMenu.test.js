@@ -97,3 +97,17 @@ describe('useMenu Hook', () => {
     expect(ok).toBeFalsy();
   });
 });
+
+describe('useMenu Hook - tanpa kios', () => {
+  it('reloadMenu tanpa kiosId menghasilkan daftar kosong dan tidak memanggil API', async () => {
+    api.get.mockClear();
+    const { result } = renderHook(() => useMenu(undefined));
+
+    await act(async () => {
+      await result.current.reloadMenu();
+    });
+
+    expect(result.current.menu).toEqual([]);
+    expect(api.get).not.toHaveBeenCalled();
+  });
+});
