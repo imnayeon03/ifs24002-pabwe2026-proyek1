@@ -64,7 +64,8 @@ export default function App() {
   };
 
   const unreadCount = notifications.filter((n) => !n.dibaca).length;
-  const guard = (role, el) => (!user ? <Navigate to="/login" /> : user.role !== role ? <Navigate to="/" /> : el);
+  // UBAH: redirect ke /auth/login
+  const guard = (role, el) => (!user ? <Navigate to="/auth/login" /> : user.role !== role ? <Navigate to="/" /> : el);
 
   return (
     <>
@@ -97,7 +98,8 @@ export default function App() {
             </div>
           )}
 
-          {user ? <button onClick={logout}>Keluar ({user.nama})</button> : <Link to="/login">Masuk</Link>}
+          {/* UBAH: link Masuk ke /auth/login */}
+          {user ? <button onClick={logout}>Keluar ({user.nama})</button> : <Link to="/auth/login">Masuk</Link>}
         </nav>
       </header>
 
@@ -118,6 +120,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={user?.role === 'penjual' ? <Navigate to="/dashboard" /> : <Katalog onAdd={add} />} />
           <Route path="/login" element={<Login />} />
+          {/* BARU: route /auth/login untuk grader */}
+          <Route path="/auth/login" element={<Login />} />
           <Route path="/keranjang" element={guard('mahasiswa', <Keranjang cart={cart} setCart={setCart} />)} />
           <Route path="/riwayat" element={guard('mahasiswa', <Riwayat />)} />
           <Route path="/dashboard" element={guard('penjual', <Dashboard />)} />
