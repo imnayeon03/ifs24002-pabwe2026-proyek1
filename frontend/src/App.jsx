@@ -12,7 +12,7 @@ import Notifikasi from './pages/Notifikasi.jsx'; // BARU
 import NotifikasiDropdown from './components/NotifikasiDropdown.jsx';
 
 export default function App() {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const [cart, setCart] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [showNotif, setShowNotif] = useState(false);
@@ -66,6 +66,8 @@ export default function App() {
   };
 
   const unreadCount = notifications.filter((n) => !n.dibaca).length;
+  // Saat loading, jangan redirect dulu — tunggu localStorage terbaca
+  if (loading) return <div id="app-loading" aria-busy="true" style={{ display: 'none' }} />;
   const guard = (role, el) => (!user ? <Navigate to="/auth/login" /> : user.role !== role ? <Navigate to="/" /> : el);
   // BARU: halaman yang bisa dibuka semua user yang sudah login
   const guardAny = (el) => (!user ? <Navigate to="/auth/login" /> : el);

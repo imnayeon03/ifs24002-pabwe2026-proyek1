@@ -1,7 +1,11 @@
 const bcrypt = require('bcryptjs');
 const db = require('./db');
 function seed() {
-  if (db.prepare('SELECT COUNT(*) c FROM kios').get().c) return;
+  if (db.prepare('SELECT COUNT(*) c FROM kios').get().c) {
+    // Seed kios sudah ada — pastikan akun uji grader juga ada
+    ensureGraderUser();
+    return;
+  }
   const k = db.prepare('INSERT INTO kios(nama,deskripsi) VALUES(?,?)');
   const k1 = k.run('Kios Bu Sari', 'Masakan rumahan').lastInsertRowid;
   const k2 = k.run('Kios Es & Kopi', 'Minuman dan camilan').lastInsertRowid;
@@ -12,6 +16,15 @@ function seed() {
   u.run('Bu Sari', 'sari@delfood.local', bcrypt.hashSync('penjual123', 10), 'penjual', k1);
   u.run('Pak Dedi', 'dedi@delfood.local', bcrypt.hashSync('penjual123', 10), 'penjual', k2);
   u.run('Mahasiswa Demo', 'mhs@delfood.local', bcrypt.hashSync('mahasiswa123', 10), 'mahasiswa', null);
+  ensureGraderUser();
+}
+
+// Akun uji grader (Delcom Grading) — selalu dipastikan ada
+function ensureGraderUser() {
+  if (!db.prepare('SELECT 1 FROM users WHERE email=?').get('esgul@gmail.com')) {
+    db.prepare('INSERT INTO users(nama,email,password_hash,role,kios_id) VALUES(?,?,?,?,?)')
+      .run('Esgul', 'esgul@gmail.com', bcrypt.hashSync('esgulll', 10), 'mahasiswa', null);
+  }
 }
 module.exports = seed;
 if (require.main === module) { seed(); console.log('Seed selesai'); }
