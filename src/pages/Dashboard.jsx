@@ -72,14 +72,18 @@ export default function Dashboard() {
     if (orders.length === 0) {
       return <p className="muted">Belum ada pesanan.</p>;
     }
-    return orders.map((o) => (
-      <PesananMasukCard
-        key={o.id}
-        order={o}
-        onUbahStatus={ubahStatus}
-        onKonfirmasiKirimClick={setKirimTarget}
-      />
-    ));
+    return (
+      <>
+        {orders.map((o) => (
+          <PesananMasukCard
+            key={o.id}
+            order={o}
+            onUbahStatus={ubahStatus}
+            onKonfirmasiKirimClick={setKirimTarget}
+          />
+        ))}
+      </>
+    );
   };
 
   return (

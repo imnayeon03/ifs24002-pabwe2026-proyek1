@@ -16,9 +16,9 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <dialog
-      open
+    <div
       className="modal-overlay"
+      role="presentation"
       onKeyDown={(e) => {
         if (e.key === 'Escape') onCancel();
       }}
@@ -26,7 +26,7 @@ export default function ConfirmModal({
         if (e.target === e.currentTarget) onCancel();
       }}
     >
-      <div className="modal-content" style={{ maxWidth: '400px' }}>
+      <dialog open className="modal-content" style={{ maxWidth: '400px' }}>
         <div className="modal-header">
           <h3>{title}</h3>
           <button type="button" className="btn-close" onClick={onCancel}>✕</button>
@@ -45,8 +45,8 @@ export default function ConfirmModal({
             {confirmText}
           </button>
         </div>
-      </div>
-    </dialog>
+      </dialog>
+    </div>
   );
 }
 

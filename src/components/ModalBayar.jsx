@@ -17,9 +17,9 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
   };
 
   return (
-    <dialog
-      open
+    <div
       className="modal-overlay"
+      role="presentation"
       onKeyDown={(e) => {
         if (e.key === 'Escape') onClose();
       }}
@@ -27,7 +27,7 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="modal-content">
+      <dialog open className="modal-content">
         <div className="modal-header">
           <h3>Pembayaran Pesanan {orderNo ? `#${orderNo}` : ''}</h3>
           <button type="button" className="btn-close" onClick={onClose}>✕</button>
@@ -135,8 +135,8 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
             </button>
           </div>
         </form>
-      </div>
-    </dialog>
+      </dialog>
+    </div>
   );
 }
 

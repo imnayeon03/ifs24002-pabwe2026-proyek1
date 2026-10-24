@@ -40,14 +40,18 @@ export default function Riwayat() {
     if (orders.length === 0) {
       return <p className="muted">Belum ada pesanan.</p>;
     }
-    return orders.map((o) => (
-      <PesananCard
-        key={o.id}
-        order={o}
-        onBayar={() => setSelectedPayOrder(o)}
-        onKonfirmasiTerima={() => handleKonfirmasiTerimaClick(o)}
-      />
-    ));
+    return (
+      <>
+        {orders.map((o) => (
+          <PesananCard
+            key={o.id}
+            order={o}
+            onBayar={() => setSelectedPayOrder(o)}
+            onKonfirmasiTerima={() => handleKonfirmasiTerimaClick(o)}
+          />
+        ))}
+      </>
+    );
   };
 
   return (

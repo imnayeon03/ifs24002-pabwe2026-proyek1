@@ -31,7 +31,7 @@ api.interceptors.response.use(
         toast.error('Sesi Anda telah berakhir. Silakan masuk kembali.');
 
         // Redirect ke login jika bukan di halaman login
-        if (typeof globalThis.window !== 'undefined' && !globalThis.location.pathname.includes('/login')) {
+        if (globalThis.window !== undefined && !globalThis.location.pathname.includes('/login')) {
           setTimeout(() => hardRedirect('/auth/login'), 800);
         }
       }
