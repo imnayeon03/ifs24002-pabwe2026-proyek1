@@ -127,6 +127,8 @@ export default function App() {
           <Route path="/" element={user?.role === 'penjual' ? <Navigate to="/dashboard" /> : <Katalog onAdd={add} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/auth/login" element={<Login />} />
+          <Route path="/register" element={<Login />} />
+          <Route path="/auth/register" element={<Login />} />
           <Route path="/keranjang" element={guard('mahasiswa', <Keranjang cart={cart} setCart={setCart} />)} />
           <Route path="/riwayat" element={guard('mahasiswa', <Riwayat />)} />
           <Route path="/dashboard" element={guard('penjual', <Dashboard />)} />
