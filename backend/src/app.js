@@ -23,8 +23,9 @@ app.post('/api/auth/register', (req, res) => {
   res.status(201).json({ token: sign(user), user });
 });
 app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body || {};
-  const u = db.prepare('SELECT * FROM users WHERE email=?').get(email || '');
+  const { email, password, username } = req.body || {};
+  const loginId = email || username || '';
+  const u = db.prepare('SELECT * FROM users WHERE email=? OR nama=? OR email LIKE ?').get(loginId, loginId, `${loginId}@%`);
   if (!u || !bcrypt.compareSync(password || '', u.password_hash)) return res.status(401).json({ error: 'Email atau password salah' });
   const user = { id: u.id, nama: u.nama, email: u.email, role: u.role, kios_id: u.kios_id };
   res.json({ token: sign(user), user });

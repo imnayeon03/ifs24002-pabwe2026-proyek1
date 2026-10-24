@@ -105,7 +105,7 @@ export default function App() {
             </div>
           )}
 
-          {user ? <button onClick={logout}>Keluar ({user.nama})</button> : <Link to="/auth/login">Masuk</Link>}
+          {user ? <button id="btn-logout" onClick={logout}>Keluar ({user.nama})</button> : <Link to="/auth/login" id="btn-login">Masuk</Link>}
         </nav>
       </header>
 
