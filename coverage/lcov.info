@@ -1,5 +1,5 @@
 TN:
-SF:src\App.jsx
+SF:src/App.jsx
 FN:13,(anonymous_0)
 FN:14,(anonymous_1)
 FN:15,(anonymous_2)
@@ -69,7 +69,7 @@ BRF:14
 BRH:13
 end_of_record
 TN:
-SF:src\api.js
+SF:src/api.js
 FN:11,(anonymous_0)
 FN:20,(anonymous_1)
 FN:21,(anonymous_2)
@@ -126,7 +126,7 @@ BRF:16
 BRH:14
 end_of_record
 TN:
-SF:src\auth.jsx
+SF:src/auth.jsx
 FN:5,(anonymous_0)
 FN:7,AuthProvider
 FN:10,(anonymous_2)
@@ -181,7 +181,7 @@ BRF:4
 BRH:4
 end_of_record
 TN:
-SF:src\components\ConfirmModal.jsx
+SF:src/components/ConfirmModal.jsx
 FN:6,ConfirmModal
 FN:22,(anonymous_1)
 FN:25,(anonymous_2)
@@ -215,7 +215,7 @@ BRF:14
 BRH:12
 end_of_record
 TN:
-SF:src\components\ErrorBoundary.jsx
+SF:src/components/ErrorBoundary.jsx
 FN:9,constructor
 FN:15,getDerivedStateFromError
 FN:19,componentDidCatch
@@ -248,7 +248,7 @@ BRF:4
 BRH:4
 end_of_record
 TN:
-SF:src\components\LoadingSpinner.jsx
+SF:src/components/LoadingSpinner.jsx
 FN:6,LoadingSpinner
 FNF:1
 FNH:1
@@ -262,7 +262,7 @@ BRF:1
 BRH:1
 end_of_record
 TN:
-SF:src\components\MenuForm.jsx
+SF:src/components/MenuForm.jsx
 FN:6,MenuForm
 FN:7,(anonymous_1)
 FNF:2
@@ -294,7 +294,7 @@ BRF:13
 BRH:13
 end_of_record
 TN:
-SF:src\components\MenuTable.jsx
+SF:src/components/MenuTable.jsx
 FN:7,MenuTable
 FN:24,(anonymous_1)
 FN:31,(anonymous_2)
@@ -320,7 +320,7 @@ BRF:2
 BRH:2
 end_of_record
 TN:
-SF:src\components\ModalBayar.jsx
+SF:src/components/ModalBayar.jsx
 FN:9,ModalBayar
 FN:14,(anonymous_1)
 FN:23,(anonymous_2)
@@ -368,7 +368,7 @@ BRF:19
 BRH:15
 end_of_record
 TN:
-SF:src\components\NavBar.jsx
+SF:src/components/NavBar.jsx
 FN:9,NavBar
 FN:45,(anonymous_1)
 FN:45,(anonymous_2)
@@ -410,7 +410,7 @@ BRF:20
 BRH:20
 end_of_record
 TN:
-SF:src\components\NotifikasiDropdown.jsx
+SF:src/components/NotifikasiDropdown.jsx
 FN:4,NotifikasiDropdown
 FN:7,(anonymous_1)
 FN:28,(anonymous_2)
@@ -447,7 +447,7 @@ BRF:14
 BRH:14
 end_of_record
 TN:
-SF:src\components\PesananCard.jsx
+SF:src/components/PesananCard.jsx
 FN:8,PesananCard
 FN:35,(anonymous_1)
 FN:44,(anonymous_2)
@@ -488,7 +488,7 @@ BRF:18
 BRH:17
 end_of_record
 TN:
-SF:src\components\PesananMasukCard.jsx
+SF:src/components/PesananMasukCard.jsx
 FN:9,PesananMasukCard
 FN:35,(anonymous_1)
 FN:43,(anonymous_2)
@@ -538,7 +538,7 @@ BRF:23
 BRH:21
 end_of_record
 TN:
-SF:src\components\ToastNotification.jsx
+SF:src/components/ToastNotification.jsx
 FN:7,ToastNotification
 FNF:1
 FNH:1
@@ -554,7 +554,7 @@ BRF:2
 BRH:2
 end_of_record
 TN:
-SF:src\config\index.js
+SF:src/config/index.js
 FNF:0
 FNH:0
 DA:5,3
@@ -570,7 +570,7 @@ BRF:6
 BRH:6
 end_of_record
 TN:
-SF:src\hooks\useAsyncAction.js
+SF:src/hooks/useAsyncAction.js
 FN:15,useAsyncAction
 FN:18,(anonymous_1)
 FNF:2
@@ -601,7 +601,7 @@ BRF:6
 BRH:6
 end_of_record
 TN:
-SF:src\hooks\useCheckout.js
+SF:src/hooks/useCheckout.js
 FN:9,useCheckout
 FN:14,(anonymous_1)
 FN:17,(anonymous_2)
@@ -636,7 +636,7 @@ BRF:3
 BRH:3
 end_of_record
 TN:
-SF:src\hooks\useForm.js
+SF:src/hooks/useForm.js
 FN:8,useForm
 FN:13,(anonymous_1)
 FN:13,(anonymous_2)
@@ -748,7 +748,7 @@ BRF:37
 BRH:33
 end_of_record
 TN:
-SF:src\hooks\useMenu.js
+SF:src/hooks/useMenu.js
 FN:8,useMenu
 FN:9,(anonymous_1)
 FN:10,(anonymous_2)
@@ -799,7 +799,7 @@ BRF:13
 BRH:12
 end_of_record
 TN:
-SF:src\hooks\useNotifikasi.js
+SF:src/hooks/useNotifikasi.js
 FN:7,(anonymous_0)
 FN:7,(anonymous_1)
 FN:12,useNotifikasi
@@ -858,7 +858,7 @@ BRF:9
 BRH:8
 end_of_record
 TN:
-SF:src\hooks\useOrderActions.js
+SF:src/hooks/useOrderActions.js
 FN:8,useOrderActions
 FN:11,(anonymous_1)
 FN:18,(anonymous_2)
@@ -907,7 +907,7 @@ BRF:2
 BRH:2
 end_of_record
 TN:
-SF:src\hooks\useOrders.js
+SF:src/hooks/useOrders.js
 FN:4,(anonymous_0)
 FN:4,(anonymous_1)
 FN:10,useOrders
@@ -926,7 +926,7 @@ BRF:1
 BRH:1
 end_of_record
 TN:
-SF:src\hooks\usePolling.js
+SF:src/hooks/usePolling.js
 FN:10,usePolling
 FN:14,(anonymous_1)
 FN:18,(anonymous_2)
@@ -970,7 +970,7 @@ BRF:8
 BRH:6
 end_of_record
 TN:
-SF:src\hooks\usePollingResource.js
+SF:src/hooks/usePollingResource.js
 FN:18,usePollingResource
 FN:28,(anonymous_1)
 FNF:2
@@ -1006,7 +1006,7 @@ BRF:5
 BRH:5
 end_of_record
 TN:
-SF:src\pages\Dashboard.jsx
+SF:src/pages/Dashboard.jsx
 FN:24,Dashboard
 FN:39,handleSimpanMenu
 FN:49,(anonymous_2)
@@ -1096,7 +1096,7 @@ BRF:20
 BRH:18
 end_of_record
 TN:
-SF:src\pages\Katalog.jsx
+SF:src/pages/Katalog.jsx
 FN:6,Katalog
 FN:13,(anonymous_1)
 FN:14,(anonymous_2)
@@ -1160,7 +1160,7 @@ BRF:14
 BRH:14
 end_of_record
 TN:
-SF:src\pages\Keranjang.jsx
+SF:src/pages/Keranjang.jsx
 FN:12,Keranjang
 FN:14,(anonymous_1)
 FN:21,(anonymous_2)
@@ -1236,7 +1236,7 @@ BRF:14
 BRH:12
 end_of_record
 TN:
-SF:src\pages\Login.jsx
+SF:src/pages/Login.jsx
 FN:15,Login
 FN:29,(anonymous_1)
 FN:37,handleSubmit
@@ -1345,7 +1345,7 @@ BRF:52
 BRH:49
 end_of_record
 TN:
-SF:src\pages\Notifikasi.jsx
+SF:src/pages/Notifikasi.jsx
 FN:4,Notifikasi
 FN:8,(anonymous_1)
 FN:10,(anonymous_2)
@@ -1379,7 +1379,7 @@ BRF:7
 BRH:6
 end_of_record
 TN:
-SF:src\pages\Profil.jsx
+SF:src/pages/Profil.jsx
 FN:3,Profil
 FNF:1
 FNH:1
@@ -1392,7 +1392,7 @@ BRF:0
 BRH:0
 end_of_record
 TN:
-SF:src\pages\Riwayat.jsx
+SF:src/pages/Riwayat.jsx
 FN:9,Riwayat
 FN:16,(anonymous_1)
 FN:26,(anonymous_2)
@@ -1462,7 +1462,7 @@ BRF:14
 BRH:12
 end_of_record
 TN:
-SF:src\utils\navigation.js
+SF:src/utils/navigation.js
 FN:16,hardRedirect
 FNF:1
 FNH:1
@@ -1475,7 +1475,7 @@ BRF:1
 BRH:1
 end_of_record
 TN:
-SF:src\utils\notifications.js
+SF:src/utils/notifications.js
 FN:17,getNotifIcon
 FNF:1
 FNH:1

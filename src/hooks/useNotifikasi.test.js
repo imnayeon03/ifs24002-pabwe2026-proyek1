@@ -23,8 +23,7 @@ describe('useNotifikasi Hook', () => {
     // 1. Polling pertama: list kosong
     api.get.mockResolvedValueOnce({ data: [] });
 
-    const user = { id: 1 };
-    const { result } = renderHook(() => useNotifikasi(user));
+    renderHook(() => useNotifikasi({ id: 1 }));
 
     await act(async () => {
       vi.advanceTimersByTime(0);
@@ -65,8 +64,7 @@ describe('useNotifikasi Hook', () => {
     });
     api.patch.mockResolvedValueOnce({ data: { message: 'ok' } });
 
-    const user = { id: 1 };
-    const { result } = renderHook(() => useNotifikasi(user));
+    const { result } = renderHook(() => useNotifikasi({ id: 1 }));
 
     await waitFor(() => {
       expect(result.current.unreadCount).toBe(1);
@@ -95,8 +93,7 @@ describe('useNotifikasi Hook', () => {
     });
     api.post.mockResolvedValueOnce({ data: { message: 'ok' } });
 
-    const user = { id: 1 };
-    const { result } = renderHook(() => useNotifikasi(user));
+    const { result } = renderHook(() => useNotifikasi({ id: 1 }));
 
     await waitFor(() => {
       expect(result.current.unreadCount).toBe(2);

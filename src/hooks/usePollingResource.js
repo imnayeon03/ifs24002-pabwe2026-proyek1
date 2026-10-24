@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { errMsg } from '../api';
 import { usePolling } from './usePolling';
 
@@ -21,9 +21,12 @@ export function usePollingResource(fetcher, { intervalMs = 5000, enabled = true,
   const [error, setError] = useState('');
 
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
   const onDataRef = useRef(onData);
-  onDataRef.current = onData;
+
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+    onDataRef.current = onData;
+  }, [fetcher, onData]);
 
   const load = useCallback(async () => {
     try {

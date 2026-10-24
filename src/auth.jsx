@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 const Ctx = createContext(null);
@@ -16,17 +16,6 @@ export function AuthProvider({ children }) {
     }
   });
   const [loading] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('user');
-      if (stored) {
-        setUser(JSON.parse(stored));
-      }
-    } catch {
-      // abaikan jika localStorage rusak
-    }
-  }, []);
 
   const login = useCallback((token, u) => {
     try {

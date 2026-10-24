@@ -9,7 +9,9 @@ import { useEffect, useRef } from 'react';
  */
 export function usePolling(fn, intervalMs = 5000, enabled = true) {
   const fnRef = useRef(fn);
-  fnRef.current = fn;
+  useEffect(() => {
+    fnRef.current = fn;
+  }, [fn]);
 
   useEffect(() => {
     if (!enabled) return undefined;

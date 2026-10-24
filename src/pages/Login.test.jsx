@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route, Link } from 'react-router-dom';
+import { MemoryRouter, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../api';
 import { hardRedirect } from '../utils/navigation';
