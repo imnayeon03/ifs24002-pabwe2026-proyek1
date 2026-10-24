@@ -23,9 +23,22 @@ export default function Katalog({ onAdd }) {
       </section>
       <h2 className="section-title">Menu Hari Ini</h2>
       <div className="filters">
-        <input placeholder="Cari menu..." value={q} onChange={(e) => setQ(e.target.value)} />
-        <select value={kategori} onChange={(e) => setKategori(e.target.value)}>
-          <option value="">Semua kategori</option><option>Makanan</option><option>Minuman</option><option>Camilan</option>
+        <input
+          placeholder="Cari menu..."
+          aria-label="Cari menu"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <select
+          id="kategori-filter"
+          aria-label="Filter kategori menu"
+          value={kategori}
+          onChange={(e) => setKategori(e.target.value)}
+        >
+          <option value="">Semua kategori</option>
+          <option value="Makanan">Makanan</option>
+          <option value="Minuman">Minuman</option>
+          <option value="Camilan">Camilan</option>
         </select>
       </div>
       {err && <p className="error">{err}</p>}

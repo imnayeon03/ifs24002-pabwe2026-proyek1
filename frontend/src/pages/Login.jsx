@@ -93,7 +93,7 @@ export default function Login() {
 
   return (
     <form id="form-login" className="card narrow" onSubmit={handleSubmit} noValidate>
-      <h2>{mode === 'login' ? 'Masuk' : 'Daftar Mahasiswa'}</h2>
+      <h1>{mode === 'login' ? 'Masuk' : 'Daftar Mahasiswa'}</h1>
 
       {mode === 'register' && (
         <div>

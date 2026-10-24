@@ -58,7 +58,7 @@ export default function Keranjang({ cart, setCart }) {
 
   return (
     <div className="card narrow">
-      <h2>Keranjang</h2>
+      <h1>Keranjang Belanja</h1>
       {cart.map((x) => (
         <div className="row" key={x.menu.id}>
           <span>
@@ -99,6 +99,7 @@ export default function Keranjang({ cart, setCart }) {
         <select
           id="metode_pembayaran"
           name="metode_pembayaran"
+          aria-label="Metode Pembayaran"
           value={form.metode}
           onChange={setField('metode')}
         >

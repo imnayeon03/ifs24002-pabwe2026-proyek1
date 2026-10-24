@@ -9,6 +9,7 @@ export default function MenuForm({ editId, form, errors, onSet, onSubmit, onBata
       <div>
         <input
           placeholder="Nama menu"
+          aria-label="Nama menu"
           value={form.nama}
           onChange={onSet('nama')}
           required
@@ -21,6 +22,7 @@ export default function MenuForm({ editId, form, errors, onSet, onSubmit, onBata
           type="number"
           min="0"
           placeholder="Harga (Rp)"
+          aria-label="Harga menu (Rp)"
           value={form.harga}
           onChange={onSet('harga')}
           required
@@ -28,7 +30,11 @@ export default function MenuForm({ editId, form, errors, onSet, onSubmit, onBata
         />
         {errors.harga && <p className="error small">{errors.harga}</p>}
       </div>
-      <select value={form.kategori} onChange={onSet('kategori')}>
+      <select
+        aria-label="Kategori menu"
+        value={form.kategori}
+        onChange={onSet('kategori')}
+      >
         <option>Makanan</option>
         <option>Minuman</option>
         <option>Camilan</option>
@@ -38,6 +44,7 @@ export default function MenuForm({ editId, form, errors, onSet, onSubmit, onBata
           type="number"
           min="0"
           placeholder="Stok"
+          aria-label="Jumlah stok menu"
           value={form.stok}
           onChange={onSet('stok')}
           required

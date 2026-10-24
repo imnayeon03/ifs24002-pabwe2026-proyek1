@@ -31,8 +31,13 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
               <div className="price-large">{rupiah(total)}</div>
             </div>
 
-            <label>Pilih Metode Pembayaran:
-              <select value={metode} onChange={(e) => setMetode(e.target.value)}>
+            <label htmlFor="modal-select-metode">Pilih Metode Pembayaran:
+              <select
+                id="modal-select-metode"
+                aria-label="Pilih Metode Pembayaran"
+                value={metode}
+                onChange={(e) => setMetode(e.target.value)}
+              >
                 <option value="QRIS">QRIS (Semua E-Wallet & Bank)</option>
                 <option value="Transfer Bank BCA">Transfer Bank (BCA VA)</option>
                 <option value="Transfer Bank Mandiri">Transfer Bank (Mandiri VA)</option>
