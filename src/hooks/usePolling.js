@@ -27,13 +27,13 @@ export function usePolling(fn, intervalMs = 5000, enabled = true) {
       }
     };
 
-    // Jalankan segera sekali di awal
-    executeSafe();
+    // Jalankan segera sekali di awal (executeSafe menangani error sendiri)
+    void executeSafe();
 
     // Atur interval
     const timerId = setInterval(() => {
       if (isMounted) {
-        executeSafe();
+        void executeSafe();
       }
     }, intervalMs);
 
