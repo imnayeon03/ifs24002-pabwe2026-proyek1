@@ -7,6 +7,8 @@ import Katalog from './pages/Katalog.jsx';
 import Keranjang from './pages/Keranjang.jsx';
 import Riwayat from './pages/Riwayat.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Profil from './pages/Profil.jsx'; // BARU
+import Notifikasi from './pages/Notifikasi.jsx'; // BARU
 import NotifikasiDropdown from './components/NotifikasiDropdown.jsx';
 
 export default function App() {
@@ -64,8 +66,9 @@ export default function App() {
   };
 
   const unreadCount = notifications.filter((n) => !n.dibaca).length;
-  // UBAH: redirect ke /auth/login
   const guard = (role, el) => (!user ? <Navigate to="/auth/login" /> : user.role !== role ? <Navigate to="/" /> : el);
+  // BARU: halaman yang bisa dibuka semua user yang sudah login
+  const guardAny = (el) => (!user ? <Navigate to="/auth/login" /> : el);
 
   return (
     <>
@@ -77,6 +80,10 @@ export default function App() {
             {user && <Link to="/keranjang">Keranjang ({cart.reduce((s, x) => s + x.jumlah, 0)})</Link>}
             {user && <Link to="/riwayat">Pesanan Saya</Link>}
           </>)}
+
+          {/* BARU: link Profil dan Notifikasi untuk semua user login */}
+          {user && <Link to="/notifikasi">Notifikasi</Link>}
+          {user && <Link to="/profil">Profil</Link>}
 
           {user && (
             <div className="notif-wrapper">
@@ -98,7 +105,6 @@ export default function App() {
             </div>
           )}
 
-          {/* UBAH: link Masuk ke /auth/login */}
           {user ? <button onClick={logout}>Keluar ({user.nama})</button> : <Link to="/auth/login">Masuk</Link>}
         </nav>
       </header>
@@ -120,11 +126,13 @@ export default function App() {
         <Routes>
           <Route path="/" element={user?.role === 'penjual' ? <Navigate to="/dashboard" /> : <Katalog onAdd={add} />} />
           <Route path="/login" element={<Login />} />
-          {/* BARU: route /auth/login untuk grader */}
           <Route path="/auth/login" element={<Login />} />
           <Route path="/keranjang" element={guard('mahasiswa', <Keranjang cart={cart} setCart={setCart} />)} />
           <Route path="/riwayat" element={guard('mahasiswa', <Riwayat />)} />
           <Route path="/dashboard" element={guard('penjual', <Dashboard />)} />
+          {/* BARU */}
+          <Route path="/profil" element={guardAny(<Profil />)} />
+          <Route path="/notifikasi" element={guardAny(<Notifikasi />)} />
         </Routes>
       </main>
     </>
