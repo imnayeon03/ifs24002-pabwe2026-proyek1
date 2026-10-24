@@ -5,4 +5,5 @@ frontend/dist
 frontend/dist/
 *.db
 .env
-coverage/
+coverage/lcov-report/
+
