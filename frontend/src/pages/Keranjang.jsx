@@ -54,7 +54,12 @@ export default function Keranjang({ cart, setCart }) {
     });
   };
 
-  if (!cart.length) return <p className="muted">Keranjang kosong.</p>;
+  if (!cart.length) return (
+  <section>
+    <h1>Keranjang</h1>
+    <p className="muted">Keranjang kosong.</p>
+  </section>
+);
 
   return (
     <div className="card narrow">
