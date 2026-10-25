@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ModalBayar from './ModalBayar.jsx';
+import { PAYMENT_METHODS } from '../config/paymentMethods.js';
 
 vi.mock('../api', () => ({
   rupiah: (n) => `Rp${n}`,
@@ -94,5 +95,28 @@ describe('ModalBayar - tanpa nomor pesanan', () => {
     const heading = screen.getByRole('heading', { level: 3 });
     expect(heading.textContent.trim()).toBe('Pembayaran Pesanan');
     expect(heading.textContent).not.toContain('#');
+  });
+});
+
+describe('ModalBayar - aksesibilitas dan daftar metode', () => {
+  const baseProps = { isOpen: true, onClose: vi.fn(), total: 10000, orderNo: 3, onConfirm: vi.fn() };
+
+  it('menandai dialog sebagai modal dan memberi nama dari judulnya', () => {
+    render(<ModalBayar {...baseProps} />);
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    const heading = screen.getByRole('heading', { level: 3 });
+    expect(dialog.getAttribute('aria-labelledby')).toBe(heading.id);
+  });
+
+  it('memindahkan fokus ke dalam dialog saat terbuka', () => {
+    render(<ModalBayar {...baseProps} />);
+    expect(screen.getByRole('dialog').contains(document.activeElement)).toBe(true);
+  });
+
+  it('opsi metode pembayaran berasal dari konfigurasi bersama', () => {
+    render(<ModalBayar {...baseProps} />);
+    const options = screen.getAllByRole('option').map((o) => o.value);
+    expect(options).toEqual(PAYMENT_METHODS.map((m) => m.value));
   });
 });

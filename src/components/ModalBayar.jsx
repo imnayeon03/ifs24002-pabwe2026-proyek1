@@ -1,18 +1,24 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import PropTypes from 'prop-types';
 import { rupiah } from '../api';
 import { useEscapeKey } from '../hooks/useEscapeKey.js';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { DEFAULT_METODE, PAYMENT_METHODS, getJenisMetode } from '../config/paymentMethods.js';
 
 /**
  * Komponen presentasional untuk Modal Pembayaran.
  * Bertanggung jawab hanya pada UI pemilihan metode pembayaran & tampilan QRIS/VA.
  */
 export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm, loading = false }) {
-  const [metode, setMetode] = useState('QRIS');
+  const [metode, setMetode] = useState(DEFAULT_METODE);
+  const titleId = useId();
+  const trapRef = useFocusTrap(isOpen);
 
   useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
+
+  const jenis = getJenisMetode(metode);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,9 +28,16 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
   return (
     <div className="modal-overlay">
       <button type="button" className="modal-backdrop" aria-label="Tutup dialog" tabIndex={-1} onClick={onClose} />
-      <dialog open className="modal-content">
+      <dialog
+        open
+        className="modal-content"
+        ref={trapRef}
+        tabIndex={-1}
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
         <div className="modal-header">
-          <h3>Pembayaran Pesanan {orderNo ? `#${orderNo}` : ''}</h3>
+          <h3 id={titleId}>Pembayaran Pesanan {orderNo ? `#${orderNo}` : ''}</h3>
           <button type="button" className="btn-close" onClick={onClose}>✕</button>
         </div>
 
@@ -43,15 +56,13 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
                 value={metode}
                 onChange={(e) => setMetode(e.target.value)}
               >
-                <option value="QRIS">QRIS (Semua E-Wallet & Bank)</option>
-                <option value="Transfer Bank BCA">Transfer Bank (BCA VA)</option>
-                <option value="Transfer Bank Mandiri">Transfer Bank (Mandiri VA)</option>
-                <option value="GoPay / OVO / Dana">E-Wallet (GoPay / OVO / Dana)</option>
-                <option value="Tunai">Tunai di Tempat</option>
+                {PAYMENT_METHODS.map((m) => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
               </select>
             </div>
 
-            {metode === 'QRIS' && (
+            {jenis === 'qris' && (
               <div className="qris-card">
                 <div className="qris-header">
                   <b>QRIS Standar Pembayaran Nasional</b>
@@ -98,7 +109,7 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
               </div>
             )}
 
-            {metode.includes('Transfer') && (
+            {jenis === 'transfer' && (
               <div className="bank-card">
                 <b>Nomor Virtual Account {metode}:</b>
                 <div className="va-number">8801 1124 0029 9010</div>
@@ -107,7 +118,7 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
               </div>
             )}
 
-            {metode.includes('GoPay') && (
+            {jenis === 'ewallet' && (
               <div className="bank-card">
                 <b>Nomor E-Wallet:</b>
                 <div className="va-number">0812-3456-7890</div>
@@ -115,7 +126,7 @@ export default function ModalBayar({ isOpen, onClose, total, orderNo, onConfirm,
               </div>
             )}
 
-            {metode === 'Tunai' && (
+            {jenis === 'tunai' && (
               <div className="bank-card">
                 <b>Pembayaran Tunai di Lokasi Kios</b>
                 <p className="small muted">Silakan serahkan uang pas saat mengambil pesanan.</p>

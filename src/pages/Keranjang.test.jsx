@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Keranjang from './Keranjang.jsx';
 import { useCheckout } from '../hooks/useCheckout.js';
+import { PAYMENT_METHODS } from '../config/paymentMethods.js';
 
 vi.mock('../hooks/useCheckout.js', () => ({
   useCheckout: vi.fn(),
@@ -193,5 +194,21 @@ describe('Keranjang Component - kasus tambahan', () => {
 
     expect(checkout).not.toHaveBeenCalled();
     expect(screen.getByText('Jam pengambilan wajib diisi')).toBeTruthy();
+  });
+});
+
+describe('Keranjang Component - metode pembayaran', () => {
+  it('opsi metode pembayaran berasal dari konfigurasi bersama', () => {
+    useCheckout.mockReturnValue({ checkout: vi.fn(), loading: false });
+    render(
+      <Keranjang
+        cart={[{ menu: { id: 1, nama: 'Nasi', harga: 10000, stok: 3, kios_nama: 'K' }, jumlah: 1 }]}
+        setCart={vi.fn()}
+      />
+    );
+    const select = screen.getByLabelText(/Metode Pembayaran/i);
+    expect(select.value).toBe('QRIS');
+    const options = Array.from(select.querySelectorAll('option')).map((o) => o.value);
+    expect(options).toEqual(PAYMENT_METHODS.map((m) => m.value));
   });
 });

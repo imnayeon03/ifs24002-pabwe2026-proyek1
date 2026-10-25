@@ -4,6 +4,7 @@ import { rupiah } from '../api';
 import { useForm, validators } from '../hooks/useForm.js';
 import { useCheckout } from '../hooks/useCheckout.js';
 import ModalBayar from '../components/ModalBayar.jsx';
+import { DEFAULT_METODE, METODE_TUNAI, PAYMENT_METHODS } from '../config/paymentMethods.js';
 
 const checkoutValidators = {
   jam: validators.required('Jam pengambilan'),
@@ -14,7 +15,7 @@ export default function Keranjang({ cart, setCart }) {
   const { checkout, loading } = useCheckout(() => setCart([]));
 
   const { values: form, errors, set: setField, validate } = useForm(
-    { jam: '12:00', metode: 'QRIS' },
+    { jam: '12:00', metode: DEFAULT_METODE },
     checkoutValidators
   );
 
@@ -50,7 +51,7 @@ export default function Keranjang({ cart, setCart }) {
     await checkout({
       cart,
       jam: form.jam,
-      metode: 'Tunai',
+      metode: METODE_TUNAI,
       statusBayar: 'Belum Dibayar',
     });
   };
@@ -109,11 +110,9 @@ export default function Keranjang({ cart, setCart }) {
           value={form.metode}
           onChange={setField('metode')}
         >
-          <option value="QRIS">QRIS (GoPay, OVO, Dana, BCA Mobile)</option>
-          <option value="Transfer Bank BCA">Transfer Bank (BCA VA)</option>
-          <option value="Transfer Bank Mandiri">Transfer Bank (Mandiri VA)</option>
-          <option value="GoPay / OVO / Dana">E-Wallet (GoPay / OVO / Dana)</option>
-          <option value="Tunai">Tunai di Tempat</option>
+          {PAYMENT_METHODS.map((m) => (
+            <option key={m.value} value={m.value}>{m.label}</option>
+          ))}
         </select>
       </div>
 
