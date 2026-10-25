@@ -36,8 +36,8 @@ export default function Dashboard() {
     menuValidators
   );
 
-  async function handleSimpanMenu(e) {
-    e.preventDefault();
+  async function handleSimpanMenu(event) {
+    event.preventDefault();
     if (!validate()) return;
     const ok = await saveMenu(form, editId);
     if (ok) {
@@ -46,9 +46,14 @@ export default function Dashboard() {
     }
   }
 
-  const handleMulaiEdit = (m) => {
-    setEditId(m.id);
-    setValues({ nama: m.nama, harga: String(m.harga), kategori: m.kategori, stok: String(m.stok) });
+  const handleMulaiEdit = (menuItem) => {
+    setEditId(menuItem.id);
+    setValues({
+      nama: menuItem.nama,
+      harga: String(menuItem.harga),
+      kategori: menuItem.kategori,
+      stok: String(menuItem.stok),
+    });
   };
 
   // ConfirmModal hanya terbuka (dan bisa dikonfirmasi) saat target sudah terisi.
@@ -62,7 +67,7 @@ export default function Dashboard() {
     setKirimTarget(null);
   };
 
-  const paidOrdersCount = orders.filter((o) => o.status_pembayaran === 'Sudah Dibayar' && o.status !== 'Selesai').length;
+  const paidOrdersCount = orders.filter((order) => order.status_pembayaran === 'Sudah Dibayar' && order.status !== 'Selesai').length;
 
   const renderOrdersContent = () => {
     if (ordersLoading) {
@@ -73,10 +78,10 @@ export default function Dashboard() {
     }
     return (
       <>
-        {orders.map((o) => (
+        {orders.map((order) => (
           <PesananMasukCard
-            key={o.id}
-            order={o}
+            key={order.id}
+            order={order}
             onUbahStatus={ubahStatus}
             onKonfirmasiKirimClick={setKirimTarget}
           />

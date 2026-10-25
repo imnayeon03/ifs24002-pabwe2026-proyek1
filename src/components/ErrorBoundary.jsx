@@ -27,7 +27,7 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="card narrow" style={{ textAlign: 'center', padding: '2rem' }} role="alert">
+        <div className="card narrow error-fallback" role="alert">
           <h2>⚠️ Terjadi Kesalahan</h2>
           <p className="muted">{this.state.error?.message || 'Halaman tidak dapat dimuat.'}</p>
           <button type="button" className="primary" onClick={this.handleReset}>

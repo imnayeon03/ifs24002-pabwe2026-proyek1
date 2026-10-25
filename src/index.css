@@ -120,3 +120,14 @@ a{color:var(--purple)}
 
 /* === Error small text under inputs === */
 .error.small,.small.error{font-size:12px;margin:2px 0 0}
+
+/* === Modal dasar & ConfirmModal === */
+.modal-sm{max-width:400px}
+.confirm-body{padding:12px 0}
+.btn-danger{background:#ef4444;color:#fff;border:none}
+
+/* === ErrorBoundary === */
+.error-fallback{text-align:center;padding:2rem}
+
+/* === Keranjang === */
+.cart-actions{display:flex;flex-direction:column;gap:8px;margin-top:12px}

@@ -3,12 +3,19 @@ import toast from 'react-hot-toast';
 import { config } from './config';
 import { hardRedirect } from './utils/navigation';
 
+const AUTH_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/logout'];
+
 const api = axios.create({
   baseURL: config.apiBaseUrl,
 });
 
-// Request Interceptor: Lampirkan JWT token jika tersedia
+// Request Interceptor: Lampirkan JWT token (atau kirim cookie sesi pada mode cookie HttpOnly)
 api.interceptors.request.use((reqConfig) => {
+  if (config.useCookieAuth) {
+    // Mode cookie HttpOnly: browser mengirim cookie sesi sendiri, tidak ada token di JavaScript.
+    reqConfig.withCredentials = true;
+    return reqConfig;
+  }
   const token = localStorage.getItem('token');
   if (token) {
     reqConfig.headers.Authorization = `Bearer ${token}`;
@@ -22,9 +29,9 @@ api.interceptors.response.use(
   (error) => {
     if (error?.response?.status === 401) {
       const requestUrl = error.config?.url || '';
-      const isAuthAttempt = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+      const isAuthAttempt = AUTH_ENDPOINTS.some((endpoint) => requestUrl.includes(endpoint));
 
-      // Jika bukan saat mencoba login/register, berarti sesi token telah habis
+      // Jika bukan saat mencoba login/register/logout, berarti sesi token telah habis
       if (!isAuthAttempt) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -40,7 +47,7 @@ api.interceptors.response.use(
   }
 );
 
-export const errMsg = (e) => e?.response?.data?.error || 'Terjadi kesalahan, coba lagi';
-export const rupiah = (n) => 'Rp' + Number(n).toLocaleString('id-ID');
+export const errMsg = (error) => error?.response?.data?.error || 'Terjadi kesalahan, coba lagi';
+export const rupiah = (amount) => 'Rp' + Number(amount).toLocaleString('id-ID');
 
 export default api;

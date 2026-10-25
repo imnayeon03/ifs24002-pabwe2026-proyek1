@@ -41,12 +41,12 @@ export default function Riwayat() {
     }
     return (
       <>
-        {orders.map((o) => (
+        {orders.map((order) => (
           <PesananCard
-            key={o.id}
-            order={o}
-            onBayar={() => setSelectedPayOrder(o)}
-            onKonfirmasiTerima={() => handleKonfirmasiTerimaClick(o)}
+            key={order.id}
+            order={order}
+            onBayar={() => setSelectedPayOrder(order)}
+            onKonfirmasiTerima={() => handleKonfirmasiTerimaClick(order)}
           />
         ))}
       </>

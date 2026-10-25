@@ -2,9 +2,8 @@ import { useCallback, useRef } from 'react';
 import toast from 'react-hot-toast';
 import api from '../api';
 import { usePollingResource } from './usePollingResource';
+import { fetchNotifications } from './useNotificationList.js';
 import { getNotifIcon } from '../utils/notifications';
-
-const fetchNotifications = () => api.get('/notifications').then((r) => r.data);
 
 /**
  * Notifikasi + toast untuk notifikasi baru yang belum dibaca.
@@ -30,7 +29,7 @@ export function useNotifikasi(user) {
     async (id) => {
       try {
         await api.patch(`/notifications/${id}/baca`);
-        setData((prev) => prev.map((n) => (n.id === id ? { ...n, dibaca: 1 } : n)));
+        setData((prev) => prev.map((notification) => (notification.id === id ? { ...notification, dibaca: 1 } : notification)));
       } catch {
         // gagal menandai dibaca tidak kritis; polling berikutnya menyinkronkan ulang
       }
@@ -41,13 +40,13 @@ export function useNotifikasi(user) {
   const markAllRead = useCallback(async () => {
     try {
       await api.post('/notifications/baca-semua');
-      setData((prev) => prev.map((n) => ({ ...n, dibaca: 1 })));
+      setData((prev) => prev.map((notification) => ({ ...notification, dibaca: 1 })));
     } catch {
       // idem
     }
   }, [setData]);
 
-  const unreadCount = notifications.filter((n) => !n.dibaca).length;
+  const unreadCount = notifications.filter((notification) => !notification.dibaca).length;
 
   return { notifications, unreadCount, markRead, markAllRead };
 }

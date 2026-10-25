@@ -21,9 +21,9 @@ export function useAsyncAction() {
       await action();
       if (success) toast.success(success);
       return true;
-    } catch (e) {
-      toast.error(errMsg(e));
-      if (rethrow) throw e;
+    } catch (error) {
+      toast.error(errMsg(error));
+      if (rethrow) throw error;
       return false;
     } finally {
       setLoading(false);

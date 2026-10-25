@@ -20,9 +20,9 @@ export function usePolling(fn, intervalMs = 5000, enabled = true) {
     const executeSafe = async () => {
       try {
         await fnRef.current();
-      } catch (err) {
+      } catch (error) {
         // Log debug error callback polling agar tidak ditelan secara diam-diam
-        console.debug('[usePolling] Callback error handled:', err);
+        console.debug('[usePolling] Callback error handled:', error);
       }
     };
 

@@ -34,8 +34,8 @@ export function usePollingResource(fetcher, { intervalMs = 5000, enabled = true,
       setData(result);
       setError('');
       onDataRef.current?.(result);
-    } catch (e) {
-      setError(errMsg(e));
+    } catch (requestError) {
+      setError(errMsg(requestError));
     } finally {
       setLoading(false);
     }

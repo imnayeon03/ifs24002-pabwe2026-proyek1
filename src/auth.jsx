@@ -1,24 +1,28 @@
 import { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import api from './api';
+import { config } from './config';
 
 const Ctx = createContext(null);
 export const useAuth = () => useContext(Ctx);
 
 /**
- * KEAMANAN SESI: token JWT disimpan di localStorage.
+ * KEAMANAN SESI
  *
- * Risiko : skrip apa pun yang berjalan di halaman (mis. lewat serangan XSS atau
- *          dependensi yang disusupi) dapat membaca token ini. Berbeda dengan
- *          cookie `HttpOnly`, localStorage tidak dilindungi dari JavaScript.
- * Mitigasi yang sudah ada di front-end:
- *   - React meng-escape semua teks; tidak ada `dangerouslySetInnerHTML` di proyek ini.
- *   - Interceptor 401 (api.js) menghapus sesi begitu server menolak token.
- *   - Token diharapkan berumur pendek (diatur oleh back-end).
- * Pilihan yang lebih aman: back-end mengirim token lewat cookie `HttpOnly; Secure;
- * SameSite`, sehingga front-end tidak perlu menyimpannya sama sekali. Itu butuh
- * perubahan di back-end (set-cookie + CORS credentials), jadi belum dilakukan di sini.
- * Alasan tetap memakai localStorage: sesi harus terbaca sinkron di tab baru dan oleh
- * uji otomatis Puppeteer yang memeriksa localStorage.
+ * Mode default: token JWT disimpan di localStorage.
+ *   Risiko : skrip apa pun yang berjalan di halaman (mis. lewat XSS atau dependensi yang
+ *            disusupi) dapat membaca token. localStorage tidak dilindungi dari JavaScript.
+ *   Mitigasi di front-end: React meng-escape semua teks, tidak ada `dangerouslySetInnerHTML`,
+ *            dan interceptor 401 (api.js) menghapus sesi begitu server menolak token.
+ *
+ * Mode cookie HttpOnly (opsional): set `VITE_USE_COOKIE_AUTH=true`.
+ *   Token tidak pernah disimpan di JavaScript; browser mengirim cookie sesi sendiri
+ *   (`withCredentials`). Hanya data profil non-rahasia yang disimpan di localStorage.
+ *   Syarat di back-end: kirim `Set-Cookie: HttpOnly; Secure; SameSite`, sediakan
+ *   `POST /auth/logout` yang menghapus cookie, dan izinkan CORS dengan credentials.
+ *
+ * Mode default dipertahankan karena sesi harus terbaca sinkron di tab baru dan oleh uji
+ * otomatis Puppeteer yang memeriksa localStorage.
  */
 export function AuthProvider({ children }) {
   // Inisialisasi sinkron dari localStorage agar render pertama di tab baru
@@ -33,21 +37,27 @@ export function AuthProvider({ children }) {
   });
   const [loading] = useState(false);
 
-  const login = useCallback((token, u) => {
+  const login = useCallback((token, userData) => {
     try {
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(u));
-    } catch (err) {
-      console.error('Gagal menyimpan token ke localStorage:', err);
+      if (!config.useCookieAuth) {
+        localStorage.setItem('token', token);
+      }
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Gagal menyimpan token ke localStorage:', error);
     }
-    setUser(u);
+    setUser(userData);
   }, []);
 
   const logout = useCallback(() => {
+    if (config.useCookieAuth) {
+      // Cookie HttpOnly hanya bisa dihapus oleh server.
+      api.post('/auth/logout').catch(() => {});
+    }
     try {
       localStorage.clear();
-    } catch (err) {
-      console.error('Gagal membersihkan localStorage:', err);
+    } catch (error) {
+      console.error('Gagal membersihkan localStorage:', error);
     }
     setUser(null);
   }, []);

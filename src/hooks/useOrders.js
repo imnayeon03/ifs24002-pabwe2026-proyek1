@@ -1,7 +1,7 @@
 import api from '../api';
 import { usePollingResource } from './usePollingResource';
 
-const fetchOrders = () => api.get('/orders').then((r) => r.data);
+const fetchOrders = () => api.get('/orders').then((response) => response.data);
 
 /**
  * Daftar pesanan dengan polling berkala (dipakai Riwayat & Dashboard).

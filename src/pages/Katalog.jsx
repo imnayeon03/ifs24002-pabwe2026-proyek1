@@ -1,25 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
-import api, { rupiah } from '../api';
+import { rupiah } from '../api';
 import { useAuth } from '../auth.jsx';
+import { useMenuCatalog } from '../hooks/useMenuCatalog.js';
 
 export default function Katalog({ onAdd }) {
-  const [menu, setMenu] = useState([]);
-  const [q, setQ] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [kategori, setKategori] = useState('');
-  const [err, setErr] = useState('');
   const { user } = useAuth();
+  const { menu, error } = useMenuCatalog({ searchQuery, kategori });
 
-  useEffect(() => {
-    const t = setTimeout(() => {
-      api.get('/menu', { params: { q, kategori } }).then((r) => setMenu(r.data)).catch(() => setErr('Gagal memuat menu'));
-    }, 250);
-    return () => clearTimeout(t);
-  }, [q, kategori]);
-
-  const getButtonLabel = (m) => {
+  const getButtonLabel = (menuItem) => {
     if (!user) return 'Login untuk memesan';
-    if (!m.tersedia || m.stok < 1) return 'Habis';
+    if (!menuItem.tersedia || menuItem.stok < 1) return 'Habis';
     return '+ Keranjang';
   };
 
@@ -35,14 +28,14 @@ export default function Katalog({ onAdd }) {
         <input
           placeholder="Cari menu..."
           aria-label="Cari menu"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
         />
         <select
           id="kategori-filter"
           aria-label="Filter kategori menu"
           value={kategori}
-          onChange={(e) => setKategori(e.target.value)}
+          onChange={(event) => setKategori(event.target.value)}
         >
           <option value="">Semua kategori</option>
           <option value="Makanan">Makanan</option>
@@ -50,21 +43,26 @@ export default function Katalog({ onAdd }) {
           <option value="Camilan">Camilan</option>
         </select>
       </div>
-      {err && <p className="error">{err}</p>}
+      {error && <p className="error">{error}</p>}
       <div className="grid">
-        {menu.map((m) => (
-          <div className="card" key={m.id}>
-            <span className="tag">{m.kategori}</span>
-            <h3>{m.nama}</h3>
-            <p className="muted">{m.kios_nama}</p>
-            <p className="price">{rupiah(m.harga)}</p>
-            <p className="muted small">Stok: {m.stok}</p>
-            <button type="button" className="primary" disabled={!m.tersedia || m.stok < 1 || !user} onClick={() => onAdd(m)}>
-              {getButtonLabel(m)}
+        {menu.map((menuItem) => (
+          <div className="card" key={menuItem.id}>
+            <span className="tag">{menuItem.kategori}</span>
+            <h3>{menuItem.nama}</h3>
+            <p className="muted">{menuItem.kios_nama}</p>
+            <p className="price">{rupiah(menuItem.harga)}</p>
+            <p className="muted small">Stok: {menuItem.stok}</p>
+            <button
+              type="button"
+              className="primary"
+              disabled={!menuItem.tersedia || menuItem.stok < 1 || !user}
+              onClick={() => onAdd(menuItem)}
+            >
+              {getButtonLabel(menuItem)}
             </button>
           </div>
         ))}
-        {menu.length === 0 && !err && <p className="muted">Menu tidak ditemukan.</p>}
+        {menu.length === 0 && !error && <p className="muted">Menu tidak ditemukan.</p>}
       </div>
     </>
   );

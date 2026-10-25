@@ -21,15 +21,15 @@ export default function MenuTable({ menu, onEdit, onHapusClick }) {
         </tr>
       </thead>
       <tbody>
-        {menu.map((m) => (
-          <tr key={m.id}>
-            <td>{m.nama}</td>
-            <td>{m.kategori}</td>
-            <td>{rupiah(m.harga)}</td>
-            <td>{m.stok}</td>
+        {menu.map((menuItem) => (
+          <tr key={menuItem.id}>
+            <td>{menuItem.nama}</td>
+            <td>{menuItem.kategori}</td>
+            <td>{rupiah(menuItem.harga)}</td>
+            <td>{menuItem.stok}</td>
             <td>
-              <button type="button" onClick={() => onEdit(m)}>Ubah</button>
-              <button type="button" onClick={() => onHapusClick(m)}>Hapus</button>
+              <button type="button" onClick={() => onEdit(menuItem)}>Ubah</button>
+              <button type="button" onClick={() => onHapusClick(menuItem)}>Hapus</button>
             </td>
           </tr>
         ))}

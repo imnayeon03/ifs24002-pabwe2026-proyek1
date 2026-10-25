@@ -23,14 +23,18 @@ export default function App() {
 
   const { notifications, unreadCount, markRead, markAllRead } = useNotifikasi(user);
 
-  const add = (m) => setCart((c) => {
-    const f = c.find((x) => x.menu.id === m.id);
-    if (f) return c.map((x) => (x.menu.id === m.id ? { ...x, jumlah: Math.min(x.jumlah + 1, m.stok) } : x));
-    return [...c, { menu: m, jumlah: 1 }];
+  const add = (menuItem) => setCart((currentCart) => {
+    const existingItem = currentCart.find((item) => item.menu.id === menuItem.id);
+    if (existingItem) {
+      return currentCart.map((item) => (
+        item.menu.id === menuItem.id ? { ...item, jumlah: Math.min(item.jumlah + 1, menuItem.stok) } : item
+      ));
+    }
+    return [...currentCart, { menu: menuItem, jumlah: 1 }];
   });
 
   // Tunggu sampai localStorage selesai dibaca sebelum render guard
-  if (loading) return <div id="app-loading" aria-busy="true" style={{ display: 'none' }} />;
+  if (loading) return <div id="app-loading" aria-busy="true" hidden />;
 
   const guard = (role, el) => {
     if (user) {

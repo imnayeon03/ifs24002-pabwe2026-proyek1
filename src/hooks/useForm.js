@@ -10,9 +10,9 @@ export function useForm(initialValues, validators = {}) {
   const [errors, setErrors] = useState({});
 
   /** Handler onChange untuk input — otomatis validasi saat blur */
-  const set = (key) => (e) => {
-    const val = e.target.value;
-    setValues((prev) => ({ ...prev, [key]: val }));
+  const set = (key) => (event) => {
+    const newValue = event.target.value;
+    setValues((prev) => ({ ...prev, [key]: newValue }));
     // Hapus error saat user mulai mengetik
     if (errors[key]) {
       setErrors((prev) => ({ ...prev, [key]: '' }));
@@ -23,8 +23,8 @@ export function useForm(initialValues, validators = {}) {
   const validate = () => {
     const newErrors = {};
     for (const key of Object.keys(validators)) {
-      const err = validators[key](values[key]);
-      if (err) newErrors[key] = err;
+      const message = validators[key](values[key]);
+      if (message) newErrors[key] = message;
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -41,19 +41,19 @@ export function useForm(initialValues, validators = {}) {
 
 /** Validator bawaan yang bisa dipakai ulang */
 export const validators = {
-  required: (label) => (v) => (v?.trim() ? null : `${label} wajib diisi`),
-  email: (v) => {
-    const val = (v || '').trim();
-    if (!val || val.length > 254) return 'Format email tidak valid';
-    const parts = val.split('@');
+  required: (label) => (value) => (value?.trim() ? null : `${label} wajib diisi`),
+  email: (value) => {
+    const text = (value || '').trim();
+    if (!text || text.length > 254) return 'Format email tidak valid';
+    const parts = text.split('@');
     if (parts.length !== 2) return 'Format email tidak valid';
     const [local, domain] = parts;
     if (!local || !domain || local.includes(' ') || domain.includes(' ')) return 'Format email tidak valid';
     const domainParts = domain.split('.');
-    if (domainParts.length < 2 || domainParts.some((p) => !p)) return 'Format email tidak valid';
+    if (domainParts.length < 2 || domainParts.some((part) => !part)) return 'Format email tidak valid';
     return null;
   },
-  minLength: (n) => (v) => ((v || '').length < n ? `Minimal ${n} karakter` : null),
-  positiveNumber: (label) => (v) => (Number.isNaN(Number(v)) || Number(v) <= 0 ? `${label} harus lebih dari 0` : null),
-  nonNegativeNumber: (label) => (v) => (Number.isNaN(Number(v)) || Number(v) < 0 ? `${label} tidak boleh negatif` : null),
+  minLength: (min) => (value) => ((value || '').length < min ? `Minimal ${min} karakter` : null),
+  positiveNumber: (label) => (value) => (Number.isNaN(Number(value)) || Number(value) <= 0 ? `${label} harus lebih dari 0` : null),
+  nonNegativeNumber: (label) => (value) => (Number.isNaN(Number(value)) || Number(value) < 0 ? `${label} tidak boleh negatif` : null),
 };

@@ -42,7 +42,7 @@ export default function NavBar({
             <button
               type="button"
               className={`btn-notif ${unreadCount > 0 ? 'has-unread' : ''}`}
-              onClick={() => setShowNotif((v) => !v)}
+              onClick={() => setShowNotif((isOpen) => !isOpen)}
               title="Notifikasi"
               aria-label={notifLabel}
               aria-expanded={showNotif}

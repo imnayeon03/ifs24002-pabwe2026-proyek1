@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import api, { rupiah, errMsg } from './api';
 import toast from 'react-hot-toast';
 import * as nav from './utils/navigation';
+import { config } from './config';
 
 vi.mock('react-hot-toast', () => ({
   default: { error: vi.fn(), success: vi.fn() },
@@ -57,6 +58,19 @@ describe('api module', () => {
       expect(result.headers.Authorization).toBeUndefined();
     });
 
+    it('mode cookie HttpOnly: mengirim credentials dan tidak menempelkan token', () => {
+      config.useCookieAuth = true;
+      try {
+        localStorage.setItem('token', 'tidak-boleh-dipakai');
+        const reqHandler = api.interceptors.request.handlers[0].fulfilled;
+        const result = reqHandler({ headers: {} });
+        expect(result.withCredentials).toBe(true);
+        expect(result.headers.Authorization).toBeUndefined();
+      } finally {
+        config.useCookieAuth = false;
+      }
+    });
+
     it('response interceptor passes success response', () => {
       const resHandler = api.interceptors.response.handlers[0].fulfilled;
       const response = { status: 200, data: { ok: true } };
@@ -93,6 +107,16 @@ describe('api module', () => {
         config: { url: '/auth/login' },
         response: { status: 401 },
       };
+
+      await expect(errHandler(error)).rejects.toEqual(error);
+      expect(localStorage.getItem('token')).toBe('some-token');
+      expect(toast.error).not.toHaveBeenCalled();
+    });
+
+    it('response interceptor tidak menganggap 401 pada /auth/logout sebagai sesi habis', async () => {
+      localStorage.setItem('token', 'some-token');
+      const errHandler = api.interceptors.response.handlers[0].rejected;
+      const error = { config: { url: '/auth/logout' }, response: { status: 401 } };
 
       await expect(errHandler(error)).rejects.toEqual(error);
       expect(localStorage.getItem('token')).toBe('some-token');

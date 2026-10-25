@@ -18,4 +18,4 @@ export const PAYMENT_METHODS = [
 ];
 
 /** @returns {'qris'|'transfer'|'ewallet'|'tunai'|undefined} */
-export const getJenisMetode = (value) => PAYMENT_METHODS.find((m) => m.value === value)?.jenis;
+export const getJenisMetode = (value) => PAYMENT_METHODS.find((method) => method.value === value)?.jenis;

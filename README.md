@@ -24,9 +24,13 @@ npm run dev
 Akun demo: `mhs@delfood.local / mahasiswa123` (mahasiswa), `sari@delfood.local / penjual123` (penjual Kios Bu Sari), `dedi@delfood.local / penjual123` (penjual Kios Es & Kopi).
 
 ## Keamanan
-- **Token di `localStorage`.** Token JWT disimpan di `localStorage` (lihat komentar di `src/auth.jsx`). Artinya skrip berbahaya yang berjalan di halaman (XSS) bisa membacanya. Mitigasi: React meng-escape output dan proyek tidak memakai `dangerouslySetInnerHTML`; sesi dihapus otomatis saat server mengembalikan 401. Pilihan yang lebih aman adalah cookie `HttpOnly; Secure; SameSite` yang dikirim back-end, tetapi itu membutuhkan perubahan di back-end.
-- **Dialog yang accessible.** `ModalBayar` dan `ConfirmModal` memakai `aria-modal`, `aria-labelledby`, dan jebakan fokus (`useFocusTrap`): Tab tidak keluar dari dialog, Escape menutup, dan fokus kembali ke tombol pemicu.
-- **Metode pembayaran** didefinisikan sekali di `src/config/paymentMethods.js`.
+- **Sesi.** Secara default token JWT disimpan di `localStorage` (risiko dan mitigasi dijelaskan di `src/auth.jsx`): skrip berbahaya di halaman (XSS) bisa membacanya, sehingga React meng-escape output, proyek tidak memakai `dangerouslySetInnerHTML`, dan sesi dihapus otomatis saat server mengembalikan 401.
+- **Mode cookie HttpOnly (opsional).** Set `VITE_USE_COOKIE_AUTH=true` agar token tidak pernah disimpan di JavaScript: browser mengirim cookie sesi (`withCredentials`) dan logout memanggil `POST /auth/logout`. Back-end harus mengirim `Set-Cookie: HttpOnly; Secure; SameSite`, menyediakan endpoint logout, dan mengizinkan CORS dengan credentials.
+- **Dialog yang accessible.** Semua dialog memakai komponen `Modal` (`aria-modal`, `aria-labelledby`, jebakan fokus lewat `useFocusTrap`, Escape menutup, fokus kembali ke pemicu).
+
+## Struktur kode
+- `src/pages` halaman, `src/components` komponen tampilan (`Modal`, `ModalBayar`, `QrisCode`, kartu pesanan), `src/hooks` logika dan akses data (`useMenuCatalog`, `useNotificationList`, `useAuthSubmit`, `useOrders`, dll.), `src/config` konfigurasi (`paymentMethods`), `src/utils` fungsi bantu.
+- Halaman tidak memanggil API langsung; pemanggilan API ada di hook.
 
 ## Pengujian
 `cd backend && npm test` (7 tes API). Pipeline CI ada di `Jenkinsfile`.

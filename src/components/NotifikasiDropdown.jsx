@@ -4,7 +4,7 @@ import { getNotifIcon } from '../utils/notifications';
 export default function NotifikasiDropdown({ isOpen, onClose, notifications, onMarkAllRead, onMarkRead }) {
   if (!isOpen) return null;
 
-  const unreadCount = notifications.filter((n) => !n.dibaca).length;
+  const unreadCount = notifications.filter((notification) => !notification.dibaca).length;
 
   return (
     <section className="notif-dropdown" aria-label="Daftar Notifikasi">
@@ -25,20 +25,20 @@ export default function NotifikasiDropdown({ isOpen, onClose, notifications, onM
         {notifications.length === 0 ? (
           <p className="notif-empty muted">Belum ada notifikasi saat ini.</p>
         ) : (
-          notifications.map((n) => (
+          notifications.map((notification) => (
             <button
               type="button"
-              key={n.id}
-              className={`notif-item ${n.dibaca ? 'read' : 'unread'}`}
-              onClick={() => !n.dibaca && onMarkRead(n.id)}
+              key={notification.id}
+              className={`notif-item ${notification.dibaca ? 'read' : 'unread'}`}
+              onClick={() => !notification.dibaca && onMarkRead(notification.id)}
             >
-              <span className="notif-icon">{getNotifIcon(n.tipe)}</span>
+              <span className="notif-icon">{getNotifIcon(notification.tipe)}</span>
               <span className="notif-content">
-                <span className="notif-title">{n.judul}</span>
-                <span className="notif-message">{n.pesan}</span>
-                <small className="notif-time muted">{n.created_at}</small>
+                <span className="notif-title">{notification.judul}</span>
+                <span className="notif-message">{notification.pesan}</span>
+                <small className="notif-time muted">{notification.created_at}</small>
               </span>
-              {!n.dibaca && <span className="unread-dot" title="Belum dibaca" />}
+              {!notification.dibaca && <span className="unread-dot" title="Belum dibaca" />}
             </button>
           ))
         )}

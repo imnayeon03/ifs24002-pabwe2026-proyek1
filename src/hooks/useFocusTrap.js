@@ -30,21 +30,21 @@ export function useFocusTrap(enabled = true) {
 
     (getFocusable()[0] ?? node).focus();
 
-    const handleKeyDown = (e) => {
-      if (e.key !== 'Tab') return;
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Tab') return;
 
       const items = getFocusable();
       if (items.length === 0) {
-        e.preventDefault();
+        event.preventDefault();
         return;
       }
 
-      const edge = e.shiftKey ? items[0] : items.at(-1);
-      const wrapTo = e.shiftKey ? items.at(-1) : items[0];
+      const edge = event.shiftKey ? items[0] : items.at(-1);
+      const wrapTo = event.shiftKey ? items.at(-1) : items[0];
       const active = document.activeElement;
 
       if (active === edge || !node.contains(active)) {
-        e.preventDefault();
+        event.preventDefault();
         wrapTo.focus();
       }
     };

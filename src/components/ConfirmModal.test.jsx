@@ -61,9 +61,9 @@ describe('ConfirmModal', () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  it('isDanger memberi kelas "error" pada tombol konfirmasi', () => {
+  it('isDanger memberi kelas "btn-danger" pada tombol konfirmasi', () => {
     setup({ isDanger: true });
-    expect(screen.getByText('Ya, Lanjutkan').className).toBe('error');
+    expect(screen.getByText('Ya, Lanjutkan').className).toBe('btn-danger');
   });
 
   it('tombol konfirmasi biasa memakai kelas "primary"', () => {

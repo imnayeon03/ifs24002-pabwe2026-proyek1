@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from './auth.jsx';
+import api from './api';
+import { config } from './config';
 
 const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
 
@@ -9,6 +11,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  config.useCookieAuth = false;
   vi.restoreAllMocks();
 });
 
@@ -83,6 +86,59 @@ describe('AuthProvider - localStorage gagal', () => {
     });
 
     expect(errorSpy).toHaveBeenCalledWith('Gagal membersihkan localStorage:', expect.any(Error));
+    expect(result.current.user).toBeNull();
+  });
+});
+
+describe('AuthProvider - mode token (default)', () => {
+  it('logout tidak memanggil server', () => {
+    const postSpy = vi.spyOn(api, 'post').mockResolvedValue({});
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    act(() => {
+      result.current.logout();
+    });
+    expect(postSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('AuthProvider - mode cookie HttpOnly', () => {
+  beforeEach(() => {
+    config.useCookieAuth = true;
+  });
+
+  it('login hanya menyimpan profil, tidak menyimpan token', () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    act(() => {
+      result.current.login('token-rahasia', { nama: 'Sari', role: 'penjual' });
+    });
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(JSON.parse(localStorage.getItem('user'))).toEqual({ nama: 'Sari', role: 'penjual' });
+    expect(result.current.user.role).toBe('penjual');
+  });
+
+  it('logout meminta server menghapus cookie lalu membersihkan sesi lokal', () => {
+    const postSpy = vi.spyOn(api, 'post').mockResolvedValue({});
+    localStorage.setItem('user', JSON.stringify({ nama: 'Edwin' }));
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    act(() => {
+      result.current.logout();
+    });
+
+    expect(postSpy).toHaveBeenCalledWith('/auth/logout');
+    expect(result.current.user).toBeNull();
+    expect(localStorage.getItem('user')).toBeNull();
+  });
+
+  it('logout tetap membersihkan sesi lokal walau server tidak terjangkau', async () => {
+    vi.spyOn(api, 'post').mockRejectedValue(new Error('offline'));
+    localStorage.setItem('user', JSON.stringify({ nama: 'Edwin' }));
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    await act(async () => {
+      result.current.logout();
+    });
+
     expect(result.current.user).toBeNull();
   });
 });

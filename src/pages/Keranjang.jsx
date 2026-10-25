@@ -19,14 +19,14 @@ export default function Keranjang({ cart, setCart }) {
     checkoutValidators
   );
 
-  const total = cart.reduce((s, x) => s + x.menu.harga * x.jumlah, 0);
+  const total = cart.reduce((sum, item) => sum + item.menu.harga * item.jumlah, 0);
 
-  const ubah = (id, d) => {
+  const ubahJumlah = (menuId, delta) => {
     setCart(
-      cart.map((x) =>
-        x.menu.id === id
-          ? { ...x, jumlah: Math.max(1, Math.min(x.menu.stok, x.jumlah + d)) }
-          : x
+      cart.map((item) =>
+        item.menu.id === menuId
+          ? { ...item, jumlah: Math.max(1, Math.min(item.menu.stok, item.jumlah + delta)) }
+          : item
       )
     );
   };
@@ -66,19 +66,19 @@ export default function Keranjang({ cart, setCart }) {
   return (
     <div className="card narrow">
       <h1>Keranjang Belanja</h1>
-      {cart.map((x) => (
-        <div className="row" key={x.menu.id}>
+      {cart.map((item) => (
+        <div className="row" key={item.menu.id}>
           <span>
-            {x.menu.nama} <small className="muted">({x.menu.kios_nama})</small>
+            {item.menu.nama} <small className="muted">({item.menu.kios_nama})</small>
           </span>
           <span>
-            <button type="button" onClick={() => ubah(x.menu.id, -1)}>-</button>{' '}
-            {x.jumlah}{' '}
-            <button type="button" onClick={() => ubah(x.menu.id, 1)}>+</button>{' '}
-            {rupiah(x.menu.harga * x.jumlah)}{' '}
+            <button type="button" onClick={() => ubahJumlah(item.menu.id, -1)}>-</button>{' '}
+            {item.jumlah}{' '}
+            <button type="button" onClick={() => ubahJumlah(item.menu.id, 1)}>+</button>{' '}
+            {rupiah(item.menu.harga * item.jumlah)}{' '}
             <button
               type="button"
-              onClick={() => setCart(cart.filter((c) => c.menu.id !== x.menu.id))}
+              onClick={() => setCart(cart.filter((cartItem) => cartItem.menu.id !== item.menu.id))}
               title="Hapus item"
             >
               ✕
@@ -110,8 +110,8 @@ export default function Keranjang({ cart, setCart }) {
           value={form.metode}
           onChange={setField('metode')}
         >
-          {PAYMENT_METHODS.map((m) => (
-            <option key={m.value} value={m.value}>{m.label}</option>
+          {PAYMENT_METHODS.map((method) => (
+            <option key={method.value} value={method.value}>{method.label}</option>
           ))}
         </select>
       </div>
@@ -121,7 +121,7 @@ export default function Keranjang({ cart, setCart }) {
         Setelah pembayaran, penjual akan langsung menerima notifikasi pembayaran dan mempersiapkan pesanan Anda.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+      <div className="cart-actions">
         <button
           type="button"
           className="primary"

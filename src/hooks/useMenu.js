@@ -7,7 +7,7 @@ import { usePollingResource } from './usePollingResource';
  */
 export function useMenu(kiosId) {
   const { data: menu, reload } = usePollingResource(
-    () => (kiosId ? api.get('/menu', { params: { kios_id: kiosId } }).then((r) => r.data) : []),
+    () => (kiosId ? api.get('/menu', { params: { kios_id: kiosId } }).then((response) => response.data) : []),
     { enabled: !!kiosId }
   );
   const { loading, run } = useAsyncAction();

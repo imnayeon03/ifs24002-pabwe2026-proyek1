@@ -20,16 +20,16 @@ export function useCheckout(onSuccess) {
             jam_ambil: jam,
             metode_pembayaran: metode,
             status_pembayaran: statusBayar,
-            items: cart.map((x) => ({ menu_id: x.menu.id, jumlah: x.jumlah })),
+            items: cart.map((item) => ({ menu_id: item.menu.id, jumlah: item.jumlah })),
           }),
         {
           success: statusBayar === 'Sudah Dibayar' ? 'Pesanan berhasil dibuat & dibayar!' : 'Pesanan berhasil dibuat!',
           rethrow: true,
         }
       );
-    } catch (e) {
-      setError(errMsg(e));
-      throw e;
+    } catch (requestError) {
+      setError(errMsg(requestError));
+      throw requestError;
     }
     onSuccess?.();
     nav('/riwayat');

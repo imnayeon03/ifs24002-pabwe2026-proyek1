@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api, { errMsg } from '../api';
-import { useAuth } from '../auth.jsx';
 import { useForm, validators } from '../hooks/useForm.js';
-import { hardRedirect } from '../utils/navigation.js';
+import { useAuthSubmit } from '../hooks/useAuthSubmit.js';
 
 const registerValidators = {
   nama: validators.required('Nama'),
@@ -12,35 +10,36 @@ const registerValidators = {
   password: validators.minLength(6),
 };
 
+const modeFromPath = (pathname) => (pathname.includes('register') ? 'register' : 'login');
+
 export default function Login() {
-  const loc = useLocation();
-  const [mode, setMode] = useState(loc.pathname.includes('register') ? 'register' : 'login');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const routerLocation = useLocation();
+  const [mode, setMode] = useState(modeFromPath(routerLocation.pathname));
+  const { loading, submit } = useAuthSubmit(mode);
 
   // Login hanya mewajibkan field terisi (ditangani di handleSubmit);
   // validasi format/panjang hanya berlaku saat mendaftar.
   const activeValidators = mode === 'register' ? registerValidators : {};
-  const { values: f, errors, set: setField, validate, reset } = useForm(
+  const { values: form, errors, set: setField, validate, reset } = useForm(
     { username: '', password: '', nama: '' },
     activeValidators
   );
 
   useEffect(() => {
-    const newMode = loc.pathname.includes('register') ? 'register' : 'login';
-    if (newMode !== mode) {
-      setMode(newMode);
+    const modeFromUrl = modeFromPath(routerLocation.pathname);
+    if (modeFromUrl !== mode) {
+      setMode(modeFromUrl);
       reset();
     }
-  }, [loc.pathname]); // eslint-disable-line
+  }, [routerLocation.pathname]); // eslint-disable-line
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
 
     // Sumber kebenaran tunggal: state dari useForm (input terkontrol), tanpa membaca DOM.
-    const username = f.username.trim();
-    const password = f.password.trim();
-    const nama = f.nama.trim();
+    const username = form.username.trim();
+    const password = form.password.trim();
+    const nama = form.nama.trim();
 
     if (mode === 'login') {
       if (!username || !password) {
@@ -51,25 +50,7 @@ export default function Login() {
       return;
     }
 
-    setLoading(true);
-    try {
-      const payload = {
-        email: username,
-        username,
-        password,
-        ...(mode === 'register' && { nama }),
-      };
-      const { data } = await api.post(mode === 'login' ? '/auth/login' : '/auth/register', payload);
-      login(data.token, data.user);
-      toast.success(mode === 'login' ? `Selamat datang, ${data.user.nama}!` : 'Pendaftaran berhasil!');
-
-      // Redirect native (bukan navigate SPA): lihat alasan di utils/navigation.js.
-      hardRedirect(data.user.role === 'penjual' ? '/dashboard' : '/');
-    } catch (err) {
-      toast.error(errMsg(err));
-    } finally {
-      setLoading(false);
-    }
+    await submit({ username, password, nama });
   }
 
   const getSubmitText = () => {
@@ -88,7 +69,7 @@ export default function Login() {
           <input
             id="nama"
             name="nama"
-            value={f.nama}
+            value={form.nama}
             onChange={setField('nama')}
             required
             aria-invalid={!!errors.nama}
@@ -106,7 +87,7 @@ export default function Login() {
           name="username"
           type={mode === 'register' ? 'email' : 'text'}
           autoComplete="username"
-          value={f.username}
+          value={form.username}
           onChange={setField('username')}
           required
           aria-invalid={!!errors.username}
@@ -121,7 +102,7 @@ export default function Login() {
           name="password"
           type="password"
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-          value={f.password}
+          value={form.password}
           onChange={setField('password')}
           required
           minLength={6}
