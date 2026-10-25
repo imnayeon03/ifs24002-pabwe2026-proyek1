@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { rupiah } from '../api';
+import { DEFAULT_METODE } from '../config/paymentMethods.js';
 
 const STATUS = ['Diterima', 'Dimasak', 'Siap', 'Dikirim', 'Selesai'];
 
@@ -17,7 +18,7 @@ export default function PesananMasukCard({ order: o, onUbahStatus, onKonfirmasiK
           <div className="order-badges">
             <span className={`status ${o.status}`}>{o.status}</span>
             <span className={`badge-payment ${isPaid ? 'paid' : 'unpaid'}`}>
-              {isPaid ? `✅ Sudah Dibayar (${o.metode_pembayaran || 'QRIS'})` : '⏳ Belum Dibayar'}
+              {isPaid ? `✅ Sudah Dibayar (${o.metode_pembayaran || DEFAULT_METODE})` : '⏳ Belum Dibayar'}
             </span>
           </div>
         </div>

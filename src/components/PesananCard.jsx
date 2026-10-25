@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { rupiah } from '../api';
+import { DEFAULT_METODE } from '../config/paymentMethods.js';
 
 /**
  * Komponen presentasional murni untuk menampilkan satu kartu pesanan.
@@ -17,7 +18,7 @@ export default function PesananCard({ order: o, onBayar, onKonfirmasiTerima }) {
             <span className={`status ${o.status}`}>{o.status}</span>
             <span className={`badge-payment ${isPaid ? 'paid' : 'unpaid'}`}>
               {isPaid
-                ? `✅ Lunas (${o.metode_pembayaran || 'QRIS'})`
+                ? `✅ Lunas (${o.metode_pembayaran || DEFAULT_METODE})`
                 : '⏳ Belum Dibayar'}
             </span>
           </div>

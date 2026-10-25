@@ -71,3 +71,24 @@ describe('ConfirmModal', () => {
     expect(screen.getByText('Ya, Lanjutkan').className).toBe('primary');
   });
 });
+
+describe('ConfirmModal - aksesibilitas', () => {
+  it('menandai dialog sebagai modal dan memberi nama dari judulnya', () => {
+    setup({ title: 'Hapus Menu' });
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    const heading = screen.getByRole('heading', { name: 'Hapus Menu' });
+    expect(dialog.getAttribute('aria-labelledby')).toBe(heading.id);
+  });
+
+  it('memindahkan fokus ke dalam dialog saat terbuka dan menjebak Tab', () => {
+    setup();
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.contains(document.activeElement)).toBe(true);
+
+    screen.getByText('Ya, Lanjutkan').focus();
+    fireEvent.keyDown(document, { key: 'Tab' });
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    expect(document.activeElement).not.toBe(screen.getByText('Ya, Lanjutkan'));
+  });
+});

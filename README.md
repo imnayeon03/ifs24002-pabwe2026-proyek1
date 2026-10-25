@@ -23,6 +23,11 @@ npm run dev
 
 Akun demo: `mhs@delfood.local / mahasiswa123` (mahasiswa), `sari@delfood.local / penjual123` (penjual Kios Bu Sari), `dedi@delfood.local / penjual123` (penjual Kios Es & Kopi).
 
+## Keamanan
+- **Token di `localStorage`.** Token JWT disimpan di `localStorage` (lihat komentar di `src/auth.jsx`). Artinya skrip berbahaya yang berjalan di halaman (XSS) bisa membacanya. Mitigasi: React meng-escape output dan proyek tidak memakai `dangerouslySetInnerHTML`; sesi dihapus otomatis saat server mengembalikan 401. Pilihan yang lebih aman adalah cookie `HttpOnly; Secure; SameSite` yang dikirim back-end, tetapi itu membutuhkan perubahan di back-end.
+- **Dialog yang accessible.** `ModalBayar` dan `ConfirmModal` memakai `aria-modal`, `aria-labelledby`, dan jebakan fokus (`useFocusTrap`): Tab tidak keluar dari dialog, Escape menutup, dan fokus kembali ke tombol pemicu.
+- **Metode pembayaran** didefinisikan sekali di `src/config/paymentMethods.js`.
+
 ## Pengujian
 `cd backend && npm test` (7 tes API). Pipeline CI ada di `Jenkinsfile`.
 
